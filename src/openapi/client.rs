@@ -1,13 +1,16 @@
-use crate::openapi::client_http::HttpClient;
+use crate::common::define::HttpFn;
+use crate::common::response::BaseResponse;
 use crate::openapi::config::OpenApiConfig;
+use crate::openapi::request::HttpBuilder;
 use crate::utils;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct OpenApiClient {
-    client: HttpClient,
     config: OpenApiConfig,
+    http_builder: HttpBuilder,
 
     headers: HashMap<&'static str, &'static str>,
     query_params: HashMap<&'static str, &'static str>,
@@ -40,11 +43,21 @@ impl OpenApiClient {
         self.query_params = query_params;
     }
 
-    pub fn with_header(&mut self, key: &'static str, value: &'static str) {
-        self.headers.insert(key, value);
+    pub fn with_request<T: Serialize, U: Deserialize>(&mut self, http_fn: HttpFn<T, U>) -> &Self {
+        self.http_builder = HttpBuilder::new(http_fn);
+        self.http_builder.with_base_url(&self.config.endpoint);
+
+        for (key, value) in self.headers.iter() {
+            self.http_builder.with_header(key, value);
+        }
+        for (key, value) in self.query_params.iter() {
+            self.http_builder.with_query(key, value);
+        }
+
+        self
     }
 
-    pub fn with_query_param(&mut self, key: &'static str, value: &'static str) {
-        self.query_params.insert(key, value);
+    pub fn call<U: Deserialize>(&self) -> anyhow::Result<BaseResponse<U>> {
+        self.http_builder.build()
     }
 }

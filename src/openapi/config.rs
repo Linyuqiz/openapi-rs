@@ -39,6 +39,10 @@ impl OpenApiConfig {
         self
     }
 
+    pub fn build(self) -> OpenApiConfig {
+        self
+    }
+
     pub fn load_from_env(&mut self) -> Self {
         Self {
             app_key: env::var("OpenApiAppKey").expect("failed to get env: OpenApiAppKey"),
