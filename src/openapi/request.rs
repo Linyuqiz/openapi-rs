@@ -1,10 +1,10 @@
-use crate::common::define::{HttpFn, RequestFn, ResponseFn};
+use crate::common::define::{HttpFn, RequestFn, ResponseFn, SD};
 use crate::common::response::BaseResponse;
 use reqwest::Body;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct HttpBuilder {
     method: reqwest::Method,
     base_url: String,
@@ -18,7 +18,7 @@ pub struct HttpBuilder {
 }
 
 impl HttpBuilder {
-    pub fn new<T: Serialize, U: Deserialize>(http_fn: HttpFn<T, U>) -> Self {
+    pub fn new<T: SD>(http_fn: HttpFn<T>) -> Self {
         let (request_fn, response_fn) = http_fn();
         let request = request_fn();
         Self {
@@ -75,15 +75,10 @@ impl HttpBuilder {
     }
 
     pub fn with_body(&mut self, body: &Body) -> &Self {
-        if let Some(ref mut body) = self.body {
-            *body = body.clone();
-        } else {
-            self.body = Some(body);
-        }
         self
     }
 
-    pub fn build<U: Deserialize>(&self) -> anyhow::Result<BaseResponse<U>> {
+    pub fn build<U: SD>(&self) -> anyhow::Result<BaseResponse<U>> {
         // serde_urlencoded::to_string(&query_params).expect("failed to encode query params");
         unimplemented!("not implemented yet")
     }

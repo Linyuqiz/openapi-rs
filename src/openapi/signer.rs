@@ -1,6 +1,7 @@
 use crate::utils::md5::md5;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt::Write;
 
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct Signer {
@@ -28,7 +29,7 @@ impl Signer {
 
     pub fn sign(&self, query_params: &HashMap<String, String>) -> anyhow::Result<String> {
         let mut buffer = String::new();
-        let mut keys: Vec<&str> = query_params.keys().cloned().collect();
+        let mut keys: Vec<String> = query_params.keys().cloned().collect();
         keys.sort();
 
         for key in keys {

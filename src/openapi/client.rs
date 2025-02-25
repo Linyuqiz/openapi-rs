@@ -1,4 +1,4 @@
-use crate::common::define::HttpFn;
+use crate::common::define::{HttpFn, SD};
 use crate::common::response::BaseResponse;
 use crate::openapi::config::OpenApiConfig;
 use crate::openapi::request::HttpBuilder;
@@ -7,13 +7,13 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct OpenApiClient {
     config: OpenApiConfig,
     http_builder: HttpBuilder,
 
-    headers: HashMap<&'static str, &'static str>,
-    query_params: HashMap<&'static str, &'static str>,
+    headers: HashMap<String, String>,
+    query_params: HashMap<String, String>,
 }
 
 impl OpenApiClient {
@@ -22,28 +22,12 @@ impl OpenApiClient {
             config: open_api_config,
             ..Default::default()
         };
-        client.init_headers();
-        client.init_query_params();
+        client.headers = init_headers(&client.config);
+        client.query_params = init_query_params(&client.config);
         client
     }
 
-    fn init_headers(&mut self) {
-        let mut headers = HashMap::<&'static str, &'static str>::new();
-        headers.insert("x-ys-user-id", &self.config.user_id);
-        let x_ys_version = env::var("XYsVersion").expect("failed to get env: XYsVersion");
-        headers.insert("X-Ys-Version", &x_ys_version);
-        self.headers = headers;
-    }
-
-    fn init_query_params(&mut self) {
-        let mut query_params = HashMap::new();
-        query_params.insert("AppKey", &*self.config.app_key);
-        let timestamp = utils::time::current_timestamp().expect("failed to get timestamp");
-        query_params.insert("Timestamp", &*timestamp);
-        self.query_params = query_params;
-    }
-
-    pub fn with_request<T: Serialize, U: Deserialize>(&mut self, http_fn: HttpFn<T, U>) -> &Self {
+    pub fn with_request<T: SD>(&mut self, http_fn: HttpFn<T>) -> &Self {
         self.http_builder = HttpBuilder::new(http_fn);
         self.http_builder.with_base_url(&self.config.endpoint);
 
@@ -57,7 +41,25 @@ impl OpenApiClient {
         self
     }
 
-    pub fn call<U: Deserialize>(&self) -> anyhow::Result<BaseResponse<U>> {
+    pub fn call<T: SD>(&self) -> anyhow::Result<BaseResponse<T>> {
         self.http_builder.build()
     }
+}
+
+fn init_headers(config: &OpenApiConfig) -> HashMap<String, String> {
+    let mut headers = HashMap::new();
+    let user_id = config.user_id.clone();
+    headers.insert("x-ys-user-id".to_string(), user_id);
+    let x_ys_version = env::var("XYsVersion").expect("failed to get env: XYsVersion");
+    headers.insert("X-Ys-Version".to_string(), x_ys_version);
+    headers
+}
+
+fn init_query_params(config: &OpenApiConfig) -> HashMap<String, String> {
+    let mut query_params = HashMap::new();
+    let app_key = config.app_key.clone();
+    query_params.insert("AppKey".to_string(), app_key);
+    let timestamp = utils::time::current_timestamp().expect("failed to get timestamp");
+    query_params.insert("Timestamp".to_string(), timestamp);
+    query_params
 }

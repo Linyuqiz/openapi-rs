@@ -1,9 +1,9 @@
-use crate::common::define::{RequestFn, ResponseFn};
+use crate::common::define::{RequestFn, ResponseFn, SD};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct BaseRequest<T: Serialize> {
+#[derive(Debug, Default)]
+pub struct BaseRequest {
     pub method: reqwest::Method,
     pub uri: String,
 

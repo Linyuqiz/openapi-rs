@@ -2,8 +2,12 @@ use crate::common::request::BaseRequest;
 use crate::common::response::BaseResponse;
 use serde::{Deserialize, Serialize};
 
-pub type HttpFn<T: Serialize, U: Deserialize> = fn() -> (RequestFn<T>, ResponseFn<U>);
+pub trait SD: Serialize + for<'de> Deserialize<'de> {}
 
-pub type RequestFn<T: Serialize> = fn() -> BaseRequest<T>;
+impl<T> SD for T where T: Serialize + for<'de> Deserialize<'de> {}
 
-pub type ResponseFn<U: Deserialize> = fn(reqwest::Response) -> anyhow::Result<BaseResponse<U>>;
+pub type HttpFn<T: SD> = fn() -> (RequestFn, ResponseFn<T>);
+
+pub type RequestFn = fn() -> BaseRequest;
+
+pub type ResponseFn<T: SD> = fn(reqwest::Response) -> anyhow::Result<BaseResponse<T>>;

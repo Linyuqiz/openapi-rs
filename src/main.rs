@@ -1,3 +1,4 @@
+use crate::api::v1::job::zone_list::ZoneListResponse;
 use crate::openapi::client::OpenApiClient;
 use crate::openapi::config::OpenApiConfig;
 use api::v1::job::zone_list::ZoneListRequest;
@@ -13,7 +14,7 @@ async fn main() {
     let config = OpenApiConfig::new().load_from_env();
     let mut client = OpenApiClient::new(config);
 
-    let http_fn = ZoneListRequest::new().build();
-    let x = client.with_request(http_fn).call().await;
+    let http_fn = ZoneListRequest::new().build::<ZoneListResponse>();
+    let x = client.with_request(http_fn).call::<ZoneListResponse>();
     println!("{:?}", x);
 }
