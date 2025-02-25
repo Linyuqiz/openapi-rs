@@ -4,6 +4,7 @@ use crate::openapi::config::OpenApiConfig;
 use api::v1::job::zone_list::ZoneListRequest;
 
 mod api;
+mod callback;
 mod common;
 mod openapi;
 mod utils;
