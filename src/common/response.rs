@@ -1,8 +1,7 @@
-use crate::common::define::SD;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
-pub struct BaseResponse<T: SD> {
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BaseResponse<T> {
     pub error_code: String,
     pub error_msg: String,
     pub request_id: String,

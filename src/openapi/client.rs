@@ -3,7 +3,6 @@ use crate::common::response::BaseResponse;
 use crate::openapi::config::OpenApiConfig;
 use crate::openapi::request::HttpBuilder;
 use crate::utils;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
 

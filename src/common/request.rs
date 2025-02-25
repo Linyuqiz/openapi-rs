@@ -1,5 +1,3 @@
-use crate::common::define::{RequestFn, ResponseFn, SD};
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Default)]

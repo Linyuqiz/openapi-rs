@@ -14,7 +14,7 @@ async fn main() {
     let config = OpenApiConfig::new().load_from_env();
     let mut client = OpenApiClient::new(config);
 
-    let http_fn = ZoneListRequest::new().build::<ZoneListResponse>();
+    let http_fn = ZoneListRequest::new().build();
     let x = client.with_request(http_fn).call::<ZoneListResponse>();
     println!("{:?}", x);
 }

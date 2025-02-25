@@ -1,7 +1,6 @@
-use crate::common::define::{HttpFn, RequestFn, ResponseFn, SD};
+use crate::common::define::{HttpFn, SD};
 use crate::common::response::BaseResponse;
 use reqwest::Body;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Default)]
