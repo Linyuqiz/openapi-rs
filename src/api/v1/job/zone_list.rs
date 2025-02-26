@@ -3,8 +3,10 @@ use crate::common::request::BaseRequest;
 use crate::common::response::BaseResponse;
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct ZoneListRequest {}
 
 impl ZoneListRequest {
@@ -18,25 +20,63 @@ impl ZoneListRequest {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct ZoneListResponse {}
+#[serde(default)]
+pub struct ZoneListResponse {
+    #[serde(rename = "Zones")]
+    pub zones: HashMap<String, Zone>,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Zone {
+    #[serde(rename = "HPCEndpoint")]
+    pub hpc_endpoint: String,
+    #[serde(rename = "StorageEndpoint")]
+    pub storage_endpoint: String,
+    #[serde(rename = "CloudAppEnable")]
+    pub cloud_app_enable: bool,
+    #[serde(rename = "SyncRunnerEndpoint")]
+    pub sync_runner_endpoint: String,
+}
 
 fn request_fn() -> RequestFn {
     Box::new(|| BaseRequest {
         method: Method::GET,
-        uri: "/v1/jobs/zones".to_string(),
+        uri: "/api/zones".to_string(),
         ..Default::default()
     })
 }
 
 fn response_fn() -> AsyncResponseFn<BaseResponse<ZoneListResponse>> {
-    Box::new(|_response: reqwest::Response| {
+    Box::new(|response: reqwest::Response| {
         Box::pin(async move {
-            Ok(BaseResponse {
-                error_code: "0".to_string(),
-                error_msg: "".to_string(),
-                request_id: "".to_string(),
-                data: Some(ZoneListResponse::default()),
-            })
+            let status = response.status();
+            if !status.is_success() {
+                return Err(anyhow::anyhow!("http error: {}", status));
+            }
+            let base_response: BaseResponse<ZoneListResponse> =
+                response.json().await.expect("failed to parse response");
+            Ok(base_response)
         })
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::openapi::client::OpenApiClient;
+    use crate::openapi::config::OpenApiConfig;
+    use tracing::info;
+
+    #[tokio::test]
+    async fn test_zone_list() {
+        tracing_subscriber::fmt::init();
+        dotenvy::dotenv().expect("failed to load .env file");
+        let config = OpenApiConfig::new().load_from_env().build();
+        let mut client = OpenApiClient::new(config);
+
+        let http_fn = ZoneListRequest::new().build();
+        let response = client.send(http_fn).await.expect("failed to send request");
+        info!("response: {:#?}", response);
+    }
 }

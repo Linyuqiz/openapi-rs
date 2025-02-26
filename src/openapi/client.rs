@@ -2,13 +2,16 @@ use crate::common::define::{AsyncResponseFn, HttpFn, RequestFn};
 use crate::common::request::BaseRequest;
 use crate::common::response::BaseResponse;
 use crate::openapi::config::OpenApiConfig;
+use crate::openapi::signer::Signer;
 use crate::utils;
+use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::collections::HashMap;
 use std::env;
 
 #[derive(Debug, Default)]
 pub struct OpenApiClient {
     config: OpenApiConfig,
+    signer: Signer,
 
     headers: HashMap<String, String>,
     query_params: HashMap<String, String>,
@@ -29,15 +32,32 @@ impl OpenApiClient {
     where
         R: std::fmt::Debug + Send + 'static,
     {
-        // 生成请求对象
         let (req_fn, resp_fn) = http_fn();
         let request = req_fn();
         println!("发起请求到 URI: {:#?}", request);
 
-        // 使用异步 reqwest 客户端发送请求
-        let client = reqwest::Client::new();
-        // 示例中使用 httpbin.org 来模拟请求（实际可以使用 request.uri() 组合完整 URL）
-        let response = client.get("http://httpbin.org/get").send().await?;
+        let mut headers = HeaderMap::new();
+        for (k, v) in &self.headers {
+            headers.insert(
+                HeaderName::from_bytes(k.as_bytes()).expect("invalid header name"),
+                HeaderValue::from_str(v).expect("invalid header value"),
+            );
+        }
+
+        let url = format!(
+            "{}{}?{}",
+            self.config.endpoint,
+            request.uri,
+            serde_urlencoded::to_string(&self.query_params).expect("failed to encode query params")
+        );
+
+        let response = reqwest::Client::new()
+            .get(&url)
+            .headers(headers)
+            .form(&self.query_params)
+            .send()
+            .await
+            .expect("failed to send request");
 
         // 调用异步响应解析回调，并 await 其结果
         let parsed_response = resp_fn(response).await?;
