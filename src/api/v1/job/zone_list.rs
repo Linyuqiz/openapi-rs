@@ -12,7 +12,7 @@ impl ZoneListRequest {
         Default::default()
     }
 
-    pub fn build(self) -> HttpFn<BaseRequest, BaseResponse<ZoneListResponse>> {
+    pub fn build(self) -> HttpFn<BaseResponse<ZoneListResponse>> {
         || (request_fn(), response_fn())
     }
 }
@@ -20,7 +20,7 @@ impl ZoneListRequest {
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct ZoneListResponse {}
 
-fn request_fn() -> RequestFn<BaseRequest> {
+fn request_fn() -> RequestFn {
     Box::new(|| BaseRequest {
         method: Method::GET,
         uri: "/v1/jobs/zones".to_string(),

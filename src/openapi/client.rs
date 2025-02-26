@@ -25,9 +25,8 @@ impl OpenApiClient {
         client
     }
 
-    pub async fn send<T, R>(&self, http_fn: HttpFn<T, R>) -> anyhow::Result<R>
+    pub async fn send<R>(&self, http_fn: HttpFn<R>) -> anyhow::Result<R>
     where
-        T: std::fmt::Debug + Send + 'static,
         R: std::fmt::Debug + Send + 'static,
     {
         // 生成请求对象

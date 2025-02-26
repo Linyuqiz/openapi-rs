@@ -18,7 +18,7 @@ async fn main() {
 
     let http_fn = ZoneListRequest::new().build();
     let x = client
-        .send::<BaseResponse, BaseResponse<ZoneListResponse>>(http_fn)
+        .send::<BaseResponse<ZoneListResponse>>(http_fn)
         .await
         .unwrap();
     println!("{:?}", x.data);
