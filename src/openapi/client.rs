@@ -1,7 +1,7 @@
-use crate::common::define::{HttpFn, SD};
+use crate::common::define::{AsyncResponseFn, HttpFn, RequestFn};
+use crate::common::request::BaseRequest;
 use crate::common::response::BaseResponse;
 use crate::openapi::config::OpenApiConfig;
-use crate::openapi::request::HttpBuilder;
 use crate::utils;
 use std::collections::HashMap;
 use std::env;
@@ -9,7 +9,6 @@ use std::env;
 #[derive(Debug, Default)]
 pub struct OpenApiClient {
     config: OpenApiConfig,
-    http_builder: HttpBuilder,
 
     headers: HashMap<String, String>,
     query_params: HashMap<String, String>,
@@ -26,22 +25,24 @@ impl OpenApiClient {
         client
     }
 
-    pub fn with_request<T: SD>(&mut self, http_fn: HttpFn<T>) -> &Self {
-        self.http_builder = HttpBuilder::new(http_fn);
-        self.http_builder.with_base_url(&self.config.endpoint);
+    pub async fn send<T, R>(&self, http_fn: HttpFn<T, R>) -> anyhow::Result<R>
+    where
+        T: std::fmt::Debug + Send + 'static,
+        R: std::fmt::Debug + Send + 'static,
+    {
+        // 生成请求对象
+        let (req_fn, resp_fn) = http_fn();
+        let request = req_fn();
+        println!("发起请求到 URI: {:#?}", request);
 
-        for (key, value) in self.headers.iter() {
-            self.http_builder.with_header(key, value);
-        }
-        for (key, value) in self.query_params.iter() {
-            self.http_builder.with_query(key, value);
-        }
+        // 使用异步 reqwest 客户端发送请求
+        let client = reqwest::Client::new();
+        // 示例中使用 httpbin.org 来模拟请求（实际可以使用 request.uri() 组合完整 URL）
+        let response = client.get("http://httpbin.org/get").send().await?;
 
-        self
-    }
-
-    pub fn call<T: SD>(&self) -> anyhow::Result<BaseResponse<T>> {
-        self.http_builder.build()
+        // 调用异步响应解析回调，并 await 其结果
+        let parsed_response = resp_fn(response).await?;
+        Ok(parsed_response)
     }
 }
 

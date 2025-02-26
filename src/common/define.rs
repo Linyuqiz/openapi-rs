@@ -1,12 +1,11 @@
-use crate::common::request::BaseRequest;
-use serde::{Deserialize, Serialize};
+use std::pin::Pin;
 
-pub trait SD: Serialize + for<'de> Deserialize<'de> {}
+pub type HttpFn<T, R> = fn() -> (RequestFn<T>, AsyncResponseFn<R>);
 
-impl<T> SD for T where T: Serialize + for<'de> Deserialize<'de> {}
+pub type RequestFn<T> = Box<dyn Fn() -> T + Send + Sync>;
 
-pub type HttpFn<T: SD> = fn() -> (RequestFn, ResponseFn<T>);
-
-pub type RequestFn = fn() -> BaseRequest;
-
-pub type ResponseFn<T: SD> = fn(reqwest::Response) -> anyhow::Result<T>;
+pub type AsyncResponseFn<T> = Box<
+    dyn Fn(reqwest::Response) -> Pin<Box<dyn Future<Output = anyhow::Result<T>> + Send>>
+        + Send
+        + Sync,
+>;
