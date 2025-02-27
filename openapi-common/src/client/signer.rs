@@ -1,4 +1,4 @@
-use crate::utils::md5::md5;
+use openapi_util::encrypt::md5::md5;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Write;

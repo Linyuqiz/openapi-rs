@@ -17,7 +17,7 @@ mod tests {
     #[test]
     fn test_current_timestamp() {
         let timestamp = current_timestamp().unwrap();
-        dbg!("timestamp: {}", &timestamp);
+        dbg!(&timestamp);
         assert!(timestamp.parse::<i64>().is_ok());
     }
 }

@@ -1,12 +1,14 @@
-use crate::common::define::{AsyncResponseFn, HttpFn, RequestFn};
-use crate::common::request::BaseRequest;
-use crate::common::response::BaseResponse;
-use crate::openapi::config::OpenApiConfig;
-use crate::openapi::signer::Signer;
-use crate::utils;
+use crate::client::config::OpenApiConfig;
+use crate::client::signer::Signer;
+use crate::define::HttpFn;
+use openapi_util::time::time::current_timestamp;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::collections::HashMap;
 use std::env;
+
+pub mod config;
+pub mod request;
+pub mod signer;
 
 #[derive(Debug, Default)]
 pub struct OpenApiClient {
@@ -78,7 +80,7 @@ fn init_query_params(config: &OpenApiConfig) -> HashMap<String, String> {
     let mut query_params = HashMap::new();
     let app_key = config.app_key.clone();
     query_params.insert("AppKey".to_string(), app_key);
-    let timestamp = utils::time::current_timestamp().expect("failed to get timestamp");
+    let timestamp = current_timestamp().expect("failed to get timestamp");
     query_params.insert("Timestamp".to_string(), timestamp);
     query_params
 }

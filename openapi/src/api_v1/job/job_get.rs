@@ -1,6 +1,4 @@
-use crate::common::define::{AsyncResponseFn, HttpFn, RequestFn};
-use crate::common::request::BaseRequest;
-use crate::common::response::BaseResponse;
+use openapi_common::define::{AsyncResponseFn, BaseRequest, BaseResponse, HttpFn, RequestFn};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 
@@ -29,24 +27,6 @@ impl JobGetRequest {
 #[serde(default)]
 pub struct JobGetResponse {}
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[serde(default)]
-pub struct AllocResource {
-    #[serde(rename = "Cores")]
-    pub cores: i32,
-    #[serde(rename = "Resources")]
-    pub memory: i32,
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[serde(default)]
-pub struct Progress {
-    #[serde(rename = "TotalSize")]
-    pub total_size: i32,
-    #[serde(rename = "Progress")]
-    pub progress: i32,
-}
-
 fn request_fn() -> RequestFn {
     Box::new(|| BaseRequest {
         method: Method::GET,
@@ -72,8 +52,8 @@ fn response_fn() -> AsyncResponseFn<BaseResponse<JobGetResponse>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::openapi::client::OpenApiClient;
-    use crate::openapi::config::OpenApiConfig;
+    use openapi_common::client::OpenApiClient;
+    use openapi_common::client::config::OpenApiConfig;
     use tracing::info;
 
     #[tokio::test]
