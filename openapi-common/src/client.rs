@@ -16,79 +16,78 @@ pub mod signer;
 pub struct OpenApiClient {
     config: OpenApiConfig,
     signer: Signer,
-
-    headers: HashMap<String, String>,
-    query_params: HashMap<String, String>,
 }
 
 impl OpenApiClient {
     pub fn new(open_api_config: OpenApiConfig) -> Self {
         let app_key = open_api_config.app_key.clone();
         let app_secret = open_api_config.app_secret.clone();
-        let mut client = Self {
+        Self {
             config: open_api_config,
             signer: Signer::new(&app_key, &app_secret),
             ..Default::default()
-        };
-        client.headers = init_headers(&client.config);
-        client.query_params = init_query_params(&client.config);
-        client
+        }
     }
 
     pub async fn send<R>(&mut self, http_fn: HttpFn<R>) -> anyhow::Result<R>
     where
         R: std::fmt::Debug + Send + 'static,
     {
+        let default_headers = init_headers(&self.config)?;
+        let mut default_query_params = init_query_params(&self.config)?;
+
         let (req_fn, resp_fn) = http_fn();
         let request = req_fn();
 
         let mut headers = HeaderMap::new();
-        for (k, v) in &self.headers {
+        for (k, v) in default_headers {
             headers.insert(
-                HeaderName::from_bytes(k.as_bytes()).expect("invalid header name"),
-                HeaderValue::from_str(v).expect("invalid header value"),
+                HeaderName::from_bytes(k.as_bytes())?,
+                HeaderValue::from_str(&*v)?,
             );
         }
-        let signature = self
-            .signer
-            .sign_request(&request, &self.query_params)
-            .expect("failed to sign request");
-        self.query_params.insert("Signature".to_string(), signature);
+        let signature = self.signer.sign_request(&request, &default_query_params)?;
+        default_query_params.insert("Signature".to_string(), signature);
         let url = format!(
             "{}{}?{}",
             self.config.endpoint,
             request.uri,
-            serde_urlencoded::to_string(&self.query_params).expect("failed to encode query params")
+            serde_urlencoded::to_string(&default_query_params)?
         );
 
         let response = HttpBuilder::new()
             .builder()
             .get(&url)
             .headers(headers)
-            .form(&self.query_params)
+            .form(&default_query_params)
             .send()
-            .await
-            .expect("failed to send request");
+            .await?;
 
-        // 调用异步响应解析回调，并 await 其结果
+        if !response.status().is_success() {
+            return Err(anyhow!(
+                "failed to send request: {}",
+                response.status().to_string()
+            ));
+        }
+
         Ok(resp_fn(response).await?)
     }
 }
 
-fn init_headers(config: &OpenApiConfig) -> HashMap<String, String> {
+fn init_headers(config: &OpenApiConfig) -> anyhow::Result<HashMap<String, String>> {
     let mut headers = HashMap::new();
     let user_id = config.user_id.clone();
     headers.insert("x-ys-user-id".to_string(), user_id);
-    let x_ys_version = env::var("XYsVersion").expect("failed to get env: XYsVersion");
+    let x_ys_version = env::var("XYsVersion")?;
     headers.insert("X-Ys-Version".to_string(), x_ys_version);
-    headers
+    Ok(headers)
 }
 
-fn init_query_params(config: &OpenApiConfig) -> HashMap<String, String> {
+fn init_query_params(config: &OpenApiConfig) -> anyhow::Result<HashMap<String, String>> {
     let mut query_params = HashMap::new();
     let app_key = config.app_key.clone();
     query_params.insert("AppKey".to_string(), app_key);
-    let timestamp = current_timestamp().expect("failed to get timestamp");
+    let timestamp = current_timestamp()?;
     query_params.insert("Timestamp".to_string(), timestamp);
-    query_params
+    Ok(query_params)
 }

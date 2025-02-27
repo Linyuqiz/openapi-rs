@@ -4,13 +4,15 @@ use openapi_common::client::config::OpenApiConfig;
 use tracing::info;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
-    dotenvy::dotenv().expect("failed to load .env file");
-    let config = OpenApiConfig::new().load_from_env().build();
+    dotenvy::dotenv()?;
+    let config = OpenApiConfig::new().load_from_env()?.builder();
     let mut client = OpenApiClient::new(config);
 
     let http_fn = ZoneListRequest::new().build();
-    let response = client.send(http_fn).await.expect("failed to send request");
+    let response = client.send(http_fn).await?;
     info!("response: {:#?}", response);
+
+    Ok(())
 }

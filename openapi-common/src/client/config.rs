@@ -39,17 +39,17 @@ impl OpenApiConfig {
         self
     }
 
-    pub fn build(self) -> OpenApiConfig {
+    pub fn builder(self) -> OpenApiConfig {
         self
     }
 
-    pub fn load_from_env(&mut self) -> Self {
-        Self {
-            app_key: env::var("OpenApiAppKey").expect("failed to get env: OpenApiAppKey"),
-            app_secret: env::var("OpenApiAppSecret").expect("failed to get env: OpenApiAppSecret"),
-            endpoint: env::var("OpenApiEndpoint").expect("failed to get env: OpenApiEndpoint"),
-            user_id: env::var("OpenApiUserId").expect("failed to get env: OpenApiUserId"),
-            zone: env::var("OpenApiZone").expect("failed to get env: OpenApiZone"),
-        }
+    pub fn load_from_env(&mut self) -> anyhow::Result<Self> {
+        Ok(Self {
+            app_key: env::var("OpenApiAppKey")?,
+            app_secret: env::var("OpenApiAppSecret")?,
+            endpoint: env::var("OpenApiEndpoint")?,
+            user_id: env::var("OpenApiUserId")?,
+            zone: env::var("OpenApiZone")?,
+        })
     }
 }

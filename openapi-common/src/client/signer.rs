@@ -20,13 +20,11 @@ impl Signer {
 
     pub fn sign_request(
         &self,
-        base_request: &BaseRequest,
+        _base_request: &BaseRequest,
         query_params: &HashMap<String, String>,
     ) -> anyhow::Result<String> {
         let mut query_params = query_params.clone();
-        Ok(self
-            .sign(&mut query_params)
-            .expect("sign query params failed"))
+        Ok(self.sign(&mut query_params)?)
     }
 
     pub fn sign(&self, query_params: &HashMap<String, String>) -> anyhow::Result<String> {
@@ -36,7 +34,7 @@ impl Signer {
 
         for key in keys {
             if let Some(val) = query_params.get(&key) {
-                write!(buffer, "{}={}", key, val).expect("failed to write buffer");
+                write!(buffer, "{}={}", key, val)?;
             }
         }
         buffer.push_str(&self.app_secret);

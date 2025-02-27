@@ -19,7 +19,7 @@ pub struct JobInfo {
     #[serde(rename = "AllocType")]
     pub alloc_type: String,
     #[serde(rename = "ExecHostNum")]
-    pub exec_host_num: i32,
+    pub exec_host_num: isize,
     #[serde(rename = "Zone")]
     pub zone: String,
     #[serde(rename = "Workdir")]
@@ -65,7 +65,7 @@ pub struct JobInfo {
     pub upload_progress: Progress,
 
     #[serde(rename = "ExecutionDuration")]
-    pub execution_duration: i32,
+    pub execution_duration: isize,
     #[serde(rename = "ExitCode")]
     pub exit_code: String,
     #[serde(rename = "IsSystemFailed")]
@@ -84,7 +84,7 @@ pub struct AdminJobInfo {
     #[serde(rename = "Queue")]
     pub queue: String,
     #[serde(rename = "Priority")]
-    pub priority: i32,
+    pub priority: isize,
     #[serde(rename = "OriginJobID")]
     pub origin_job_id: String,
     #[serde(rename = "ExecHosts")]
@@ -103,18 +103,18 @@ pub struct AdminJobInfo {
 #[serde(default)]
 pub struct AllocResource {
     #[serde(rename = "Cores")]
-    pub cores: i32,
+    pub cores: isize,
     #[serde(rename = "Resources")]
-    pub memory: i32,
+    pub memory: isize,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Progress {
     #[serde(rename = "TotalSize")]
-    pub total_size: i32,
+    pub total_size: isize,
     #[serde(rename = "Progress")]
-    pub progress: i32,
+    pub progress: isize,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]

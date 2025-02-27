@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use openapi_common::define::{AsyncResponseFn, BaseRequest, BaseResponse, HttpFn, RequestFn};
 use openapi_model::job::job::JobInfo;
 use reqwest::{Method, Response};
@@ -28,19 +27,7 @@ impl JobGetRequest {
                 ..Default::default()
             });
             let response_fn: AsyncResponseFn<BaseResponse<JobGetResponse>> =
-                Box::new(|response: Response| {
-                    Box::pin(async move {
-                        let status = response.status();
-                        if !status.is_success() {
-                            return Err(anyhow!("http error: {status}"));
-                        }
-                        response
-                            .json()
-                            .await
-                            .map_err(|e| anyhow!("parse json error: {e}"))
-                    })
-                });
-
+                Box::new(|response: Response| Box::pin(async move { Ok(response.json().await?) }));
             (request_fn, response_fn)
         })
     }
@@ -61,16 +48,17 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-    async fn test_job_get() {
+    async fn test_job_get() -> anyhow::Result<()> {
         tracing_subscriber::fmt::init();
-        dotenvy::dotenv().expect("failed to load .env file");
-        let config = OpenApiConfig::new().load_from_env().build();
+        dotenvy::dotenv()?;
+        let config = OpenApiConfig::new().load_from_env()?.builder();
         let mut client = OpenApiClient::new(config);
 
         let http_fn = JobGetRequest::new()
             .with_job_id("5p6nwsYQWaw".to_string())
             .build();
-        let response = client.send(http_fn).await.expect("failed to send request");
+        let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
+        Ok(())
     }
 }
