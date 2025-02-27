@@ -1,0 +1,6 @@
+[package]
+name = "openapi-macros"
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
