@@ -23,8 +23,11 @@ pub struct OpenApiClient {
 
 impl OpenApiClient {
     pub fn new(open_api_config: OpenApiConfig) -> Self {
+        let app_key = open_api_config.app_key.clone();
+        let app_secret = open_api_config.app_secret.clone();
         let mut client = Self {
             config: open_api_config,
+            signer: Signer::new(&app_key, &app_secret),
             ..Default::default()
         };
         client.headers = init_headers(&client.config);
@@ -32,19 +35,12 @@ impl OpenApiClient {
         client
     }
 
-    pub async fn send<R>(&self, http_fn: HttpFn<R>) -> anyhow::Result<R>
+    pub async fn send<R>(&mut self, http_fn: HttpFn<R>) -> anyhow::Result<R>
     where
         R: std::fmt::Debug + Send + 'static,
     {
         let (req_fn, resp_fn) = http_fn();
         let request = req_fn();
-
-        let url = format!(
-            "{}{}?{}",
-            self.config.endpoint,
-            request.uri,
-            serde_urlencoded::to_string(&self.query_params).expect("failed to encode query params")
-        );
 
         let mut headers = HeaderMap::new();
         for (k, v) in &self.headers {
@@ -57,9 +53,12 @@ impl OpenApiClient {
             .signer
             .sign_request(&request, &self.query_params)
             .expect("failed to sign request");
-        headers.insert(
-            HeaderName::from_bytes("Signature".as_bytes()).expect("invalid header name"),
-            HeaderValue::from_str(&signature).expect("invalid header value"),
+        self.query_params.insert("Signature".to_string(), signature);
+        let url = format!(
+            "{}{}?{}",
+            self.config.endpoint,
+            request.uri,
+            serde_urlencoded::to_string(&self.query_params).expect("failed to encode query params")
         );
 
         let response = HttpBuilder::new()
