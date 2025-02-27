@@ -2,12 +2,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::pin::Pin;
 
-pub type HttpFn<R> = fn() -> (RequestFn, AsyncResponseFn<R>);
+pub type HttpFn<R> = Box<dyn FnOnce() -> (RequestFn, AsyncResponseFn<R>) + Send + Sync>;
 
-pub type RequestFn = Box<dyn Fn() -> BaseRequest + Send + Sync>;
+pub type RequestFn = Box<dyn FnOnce() -> BaseRequest + Send + Sync>;
 
 pub type AsyncResponseFn<T> = Box<
-    dyn Fn(reqwest::Response) -> Pin<Box<dyn Future<Output = anyhow::Result<T>> + Send>>
+    dyn FnOnce(reqwest::Response) -> Pin<Box<dyn Future<Output = anyhow::Result<T>> + Send>>
         + Send
         + Sync,
 >;

@@ -1,6 +1,8 @@
 use crate::client::config::OpenApiConfig;
+use crate::client::request::HttpBuilder;
 use crate::client::signer::Signer;
 use crate::define::HttpFn;
+use anyhow::anyhow;
 use openapi_util::time::time::current_timestamp;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::collections::HashMap;
@@ -36,15 +38,6 @@ impl OpenApiClient {
     {
         let (req_fn, resp_fn) = http_fn();
         let request = req_fn();
-        println!("发起请求到 URI: {:#?}", request);
-
-        let mut headers = HeaderMap::new();
-        for (k, v) in &self.headers {
-            headers.insert(
-                HeaderName::from_bytes(k.as_bytes()).expect("invalid header name"),
-                HeaderValue::from_str(v).expect("invalid header value"),
-            );
-        }
 
         let url = format!(
             "{}{}?{}",
@@ -53,7 +46,24 @@ impl OpenApiClient {
             serde_urlencoded::to_string(&self.query_params).expect("failed to encode query params")
         );
 
-        let response = reqwest::Client::new()
+        let mut headers = HeaderMap::new();
+        for (k, v) in &self.headers {
+            headers.insert(
+                HeaderName::from_bytes(k.as_bytes()).expect("invalid header name"),
+                HeaderValue::from_str(v).expect("invalid header value"),
+            );
+        }
+        let signature = self
+            .signer
+            .sign_request(&request, &self.query_params)
+            .expect("failed to sign request");
+        headers.insert(
+            HeaderName::from_bytes("Signature".as_bytes()).expect("invalid header name"),
+            HeaderValue::from_str(&signature).expect("invalid header value"),
+        );
+
+        let response = HttpBuilder::new()
+            .builder()
             .get(&url)
             .headers(headers)
             .form(&self.query_params)
@@ -62,8 +72,7 @@ impl OpenApiClient {
             .expect("failed to send request");
 
         // 调用异步响应解析回调，并 await 其结果
-        let parsed_response = resp_fn(response).await?;
-        Ok(parsed_response)
+        Ok(resp_fn(response).await?)
     }
 }
 

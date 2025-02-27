@@ -1,3 +1,4 @@
+use crate::define::BaseRequest;
 use openapi_util::encrypt::md5::md5;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -19,12 +20,13 @@ impl Signer {
 
     pub fn sign_request(
         &self,
-        method: &str,
-        path: &str,
+        base_request: &BaseRequest,
         query_params: &HashMap<String, String>,
     ) -> anyhow::Result<String> {
         let mut query_params = query_params.clone();
-        Ok(self.sign(&mut query_params)?)
+        Ok(self
+            .sign(&mut query_params)
+            .expect("sign query params failed"))
     }
 
     pub fn sign(&self, query_params: &HashMap<String, String>) -> anyhow::Result<String> {

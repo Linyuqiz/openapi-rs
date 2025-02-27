@@ -1,6 +1,7 @@
+use anyhow::anyhow;
 use openapi_common::define::{AsyncResponseFn, BaseRequest, BaseResponse, HttpFn, RequestFn};
 use openapi_model::job::zone::Zone;
-use reqwest::Method;
+use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -14,26 +15,27 @@ impl ZoneListRequest {
     }
 
     pub fn build(self) -> HttpFn<BaseResponse<ZoneListResponse>> {
-        || {
+        Box::new(move || {
             let request_fn: RequestFn = Box::new(|| BaseRequest {
                 method: Method::GET,
                 uri: "/api/zones".to_string(),
                 ..Default::default()
             });
             let response_fn: AsyncResponseFn<BaseResponse<ZoneListResponse>> =
-                Box::new(|response: reqwest::Response| {
+                Box::new(|response: Response| {
                     Box::pin(async move {
                         let status = response.status();
                         if !status.is_success() {
-                            return Err(anyhow::anyhow!("http error: {}", status));
+                            return Err(anyhow!("http error: {status}"));
                         }
-                        let base_response: BaseResponse<ZoneListResponse> =
-                            response.json().await.expect("failed to parse response");
-                        Ok(base_response)
+                        response
+                            .json()
+                            .await
+                            .map_err(|e| anyhow!("parse json error: {e}"))
                     })
                 });
             (request_fn, response_fn)
-        }
+        })
     }
 }
 
