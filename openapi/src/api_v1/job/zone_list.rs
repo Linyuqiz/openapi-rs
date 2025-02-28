@@ -37,7 +37,7 @@ impl HttpBuilder for ZoneListRequest {
 mod tests {
     use super::*;
     use openapi_common::client::OpenApiClient;
-    use openapi_common::client::config::OpenApiConfig;
+    use openapi_common::config::OpenApiConfig;
     use tracing::info;
 
     #[tokio::test]

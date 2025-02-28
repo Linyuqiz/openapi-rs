@@ -1,16 +1,12 @@
-use crate::client::config::OpenApiConfig;
-use crate::client::request::HttpBuilder;
-use crate::client::signer::Signer;
+use crate::config::OpenApiConfig;
+use crate::request::HttpBuilder;
+use crate::signer::Signer;
 use crate::define::HttpFn;
 use anyhow::anyhow;
 use openapi_util::time::current_timestamp;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::collections::HashMap;
 use std::env;
-
-pub mod config;
-pub mod request;
-pub mod signer;
 
 #[derive(Debug, Default)]
 pub struct OpenApiClient {

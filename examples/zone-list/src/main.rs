@@ -1,6 +1,6 @@
 use openapi::api_v1::job::zone_list::ZoneListRequest;
 use openapi_common::client::OpenApiClient;
-use openapi_common::client::config::OpenApiConfig;
+use openapi_common::config::OpenApiConfig;
 use openapi_common::define::HttpBuilder;
 use tracing::info;
 

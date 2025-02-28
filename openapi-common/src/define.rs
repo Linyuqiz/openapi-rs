@@ -23,6 +23,7 @@ pub struct BaseRequest {
     pub uri: String,
 
     pub headers: Option<HashMap<String, String>>,
+    pub content_type: Option<String>,
 
     pub query_params: Option<HashMap<String, String>>,
     pub form: Option<HashMap<String, String>>,
