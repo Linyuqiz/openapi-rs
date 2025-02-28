@@ -33,18 +33,23 @@ impl OpenApiClient {
     where
         R: std::fmt::Debug + Send + 'static,
     {
-        let default_headers = init_headers(&self.config)?;
-        let mut default_query_params = init_query_params(&self.config)?;
-
         let (req_fn, resp_fn) = http_fn();
         let request = req_fn();
 
+        let default_headers = init_headers(&self.config)?;
         let mut headers = HeaderMap::new();
         for (k, v) in default_headers {
             headers.insert(
                 HeaderName::from_bytes(k.as_bytes())?,
                 HeaderValue::from_str(&*v)?,
             );
+        }
+
+        let mut default_query_params = init_query_params(&self.config)?;
+        if let Some(ref query_params) = request.query_params {
+            for (k, v) in query_params {
+                default_query_params.insert(k.to_string(), v.to_string());
+            }
         }
         let signature = self.signer.sign_request(&request, &default_query_params)?;
         default_query_params.insert("Signature".to_string(), signature);

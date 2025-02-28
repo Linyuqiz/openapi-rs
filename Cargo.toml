@@ -13,7 +13,6 @@ members = [
 exclude = []
 
 [workspace.package]
-name = "openapi-rs"
 version = "0.1.0"
 edition = "2024"
 description = "open api for rust"
