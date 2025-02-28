@@ -3,4 +3,10 @@ name = "openapi-macros"
 version = { workspace = true }
 edition = { workspace = true }
 
+[lib]
+proc-macro = true
+
 [dependencies]
+syn = { version = "2", features = ["full", "fold"] }
+quote = "1"
+proc-macro2 = "1"
