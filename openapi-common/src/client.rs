@@ -68,6 +68,8 @@ impl OpenApiClient {
             .send()
             .await?;
 
+        dbg!(&response);
+
         if !response.status().is_success() {
             return Err(anyhow!(
                 "failed to send request: {}",

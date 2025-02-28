@@ -2,7 +2,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::pin::Pin;
 
-pub type HttpFn<R> = Box<dyn FnOnce() -> (RequestFn, AsyncResponseFn<R>) + Send + Sync>;
+pub trait HttpBuilder {
+    type Response;
+    fn builder(self) -> HttpFn<Self::Response>;
+}
+
+pub type HttpFn<T> = Box<dyn FnOnce() -> (RequestFn, AsyncResponseFn<T>) + Send + Sync>;
 
 pub type RequestFn = Box<dyn FnOnce() -> BaseRequest + Send + Sync>;
 

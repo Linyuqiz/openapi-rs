@@ -1,4 +1,6 @@
-use openapi_common::define::{AsyncResponseFn, BaseRequest, BaseResponse, HttpFn, RequestFn};
+use openapi_common::define::{
+    AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
+};
 use openapi_model::job::job::JobInfo;
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
@@ -10,26 +12,9 @@ pub struct JobGetRequest {
 }
 
 impl JobGetRequest {
-    pub fn new() -> Self {
-        Default::default()
-    }
-
     pub fn with_job_id(mut self, job_id: String) -> Self {
         self.job_id = job_id;
         self
-    }
-
-    pub fn build(self) -> HttpFn<BaseResponse<JobGetResponse>> {
-        Box::new(move || {
-            let request_fn: RequestFn = Box::new(move || BaseRequest {
-                method: Method::GET,
-                uri: format!("/api/jobs/{}", self.job_id),
-                ..Default::default()
-            });
-            let response_fn: AsyncResponseFn<BaseResponse<JobGetResponse>> =
-                Box::new(|response: Response| Box::pin(async move { Ok(response.json().await?) }));
-            (request_fn, response_fn)
-        })
     }
 }
 
@@ -38,6 +23,23 @@ impl JobGetRequest {
 pub struct JobGetResponse {
     #[serde(flatten)]
     pub job_info: JobInfo,
+}
+
+impl HttpBuilder for JobGetRequest {
+    type Response = BaseResponse<JobGetResponse>;
+
+    fn builder(self) -> HttpFn<Self::Response> {
+        Box::new(move || {
+            let request_fn: RequestFn = Box::new(move || BaseRequest {
+                method: Method::GET,
+                uri: format!("/api/jobs/{}", self.job_id),
+                ..Default::default()
+            });
+            let response_fn: AsyncResponseFn<Self::Response> =
+                Box::new(|response: Response| Box::pin(async move { Ok(response.json().await?) }));
+            (request_fn, response_fn)
+        })
+    }
 }
 
 #[cfg(test)]
@@ -54,9 +56,9 @@ mod tests {
         let config = OpenApiConfig::new().load_from_env()?.builder();
         let mut client = OpenApiClient::new(config);
 
-        let http_fn = JobGetRequest::new()
+        let http_fn = JobGetRequest::default()
             .with_job_id("5p6nwsYQWaw".to_string())
-            .build();
+            .builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
         Ok(())

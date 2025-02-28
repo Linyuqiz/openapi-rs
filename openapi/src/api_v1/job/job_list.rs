@@ -1,4 +1,6 @@
-use openapi_common::define::{AsyncResponseFn, BaseRequest, BaseResponse, HttpFn, RequestFn};
+use openapi_common::define::{
+    AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
+};
 use openapi_model::job::job::JobInfo;
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
@@ -37,8 +39,20 @@ impl JobListRequest {
         self.page_size = Some(page_size);
         self
     }
+}
 
-    pub fn build(self) -> HttpFn<BaseResponse<JobListResponse>> {
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct JobListResponse {
+    #[serde(rename = "Jobs")]
+    pub jobs: Vec<JobInfo>,
+    #[serde(rename = "Total")]
+    pub total: isize,
+}
+
+impl HttpBuilder for JobListRequest {
+    type Response = BaseResponse<JobListResponse>;
+    fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
             let request_fn: RequestFn = Box::new(move || {
                 let mut query_params = HashMap::new();
@@ -61,20 +75,11 @@ impl JobListRequest {
                     ..Default::default()
                 }
             });
-            let response_fn: AsyncResponseFn<BaseResponse<JobListResponse>> =
+            let response_fn: AsyncResponseFn<Self::Response> =
                 Box::new(|response: Response| Box::pin(async move { Ok(response.json().await?) }));
             (request_fn, response_fn)
         })
     }
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[serde(default)]
-pub struct JobListResponse {
-    #[serde(rename = "Jobs")]
-    pub jobs: Vec<JobInfo>,
-    #[serde(rename = "Total")]
-    pub total: isize,
 }
 
 #[cfg(test)]
@@ -91,7 +96,7 @@ mod tests {
         let config = OpenApiConfig::new().load_from_env()?.builder();
         let mut client = OpenApiClient::new(config);
 
-        let http_fn = JobListRequest::new().build();
+        let http_fn = JobListRequest::default().builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
         Ok(())

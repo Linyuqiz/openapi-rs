@@ -1,6 +1,7 @@
 use openapi::api_v1::job::zone_list::ZoneListRequest;
 use openapi_common::client::OpenApiClient;
 use openapi_common::client::config::OpenApiConfig;
+use openapi_common::define::HttpBuilder;
 use tracing::info;
 
 #[tokio::main]
@@ -10,7 +11,7 @@ async fn main() -> anyhow::Result<()> {
     let config = OpenApiConfig::new().load_from_env()?.builder();
     let mut client = OpenApiClient::new(config);
 
-    let http_fn = ZoneListRequest::new().build();
+    let http_fn = ZoneListRequest::default().builder();
     let response = client.send(http_fn).await?;
     info!("response: {:#?}", response);
 
