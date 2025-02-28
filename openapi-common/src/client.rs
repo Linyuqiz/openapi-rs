@@ -1,7 +1,7 @@
 use crate::config::OpenApiConfig;
+use crate::define::HttpFn;
 use crate::request::HttpBuilder;
 use crate::signer::Signer;
-use crate::define::HttpFn;
 use anyhow::anyhow;
 use openapi_util::time::current_timestamp;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};

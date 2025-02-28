@@ -1,5 +1,7 @@
-use openapi_common::define::{AsyncResponseFn, BaseRequest, BaseResponse, HttpFn, RequestFn};
-use openapi_model::job::job::AdminJobInfo;
+use openapi_common::define::{
+    AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
+};
+use openapi_model::job::AdminJobInfo;
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
 
@@ -10,26 +12,9 @@ pub struct AdminJobGetRequest {
 }
 
 impl AdminJobGetRequest {
-    pub fn new() -> Self {
-        Default::default()
-    }
-
     pub fn with_job_id(mut self, job_id: String) -> Self {
         self.job_id = job_id;
         self
-    }
-
-    pub fn build(self) -> HttpFn<BaseResponse<AdminJobGetResponse>> {
-        Box::new(move || {
-            let request_fn: RequestFn = Box::new(move || BaseRequest {
-                method: Method::GET,
-                uri: format!("/admin/jobs/{}", self.job_id),
-                ..Default::default()
-            });
-            let response_fn: AsyncResponseFn<BaseResponse<AdminJobGetResponse>> =
-                Box::new(|response: Response| Box::pin(async move { Ok(response.json().await?) }));
-            (request_fn, response_fn)
-        })
     }
 }
 
@@ -40,11 +25,27 @@ pub struct AdminJobGetResponse {
     pub job_info: AdminJobInfo,
 }
 
+impl HttpBuilder for AdminJobGetRequest {
+    type Response = BaseResponse<AdminJobGetRequest>;
+    fn builder(self) -> HttpFn<Self::Response> {
+        Box::new(move || {
+            let request_fn: RequestFn = Box::new(move || BaseRequest {
+                method: Method::GET,
+                uri: format!("/admin/jobs/{}", self.job_id),
+                ..Default::default()
+            });
+            let response_fn: AsyncResponseFn<Self::Response> =
+                Box::new(|response: Response| Box::pin(async move { Ok(response.json().await?) }));
+            (request_fn, response_fn)
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use openapi_common::client::OpenApiClient;
-    use openapi_common::client::config::OpenApiConfig;
+    use openapi_common::config::OpenApiConfig;
     use tracing::info;
 
     #[tokio::test]
@@ -54,9 +55,9 @@ mod tests {
         let config = OpenApiConfig::new().load_from_env()?.builder();
         let mut client = OpenApiClient::new(config);
 
-        let http_fn = AdminJobGetRequest::new()
+        let http_fn = AdminJobGetRequest::default()
             .with_job_id("5p6nwsYQWaw".to_string())
-            .build();
+            .builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
         Ok(())
