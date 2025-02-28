@@ -1,7 +1,7 @@
 use openapi_common::define::{
     AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
 };
-use openapi_model::job::zone::Zone;
+use openapi_model::zone::Zone;
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

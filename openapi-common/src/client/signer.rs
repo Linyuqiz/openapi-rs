@@ -23,8 +23,8 @@ impl Signer {
         _base_request: &BaseRequest,
         query_params: &HashMap<String, String>,
     ) -> anyhow::Result<String> {
-        let mut query_params = query_params.clone();
-        Ok(self.sign(&mut query_params)?)
+        let query_params = query_params.clone();
+        self.sign(&query_params)
     }
 
     pub fn sign(&self, query_params: &HashMap<String, String>) -> anyhow::Result<String> {

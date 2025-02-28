@@ -3,7 +3,7 @@ use crate::client::request::HttpBuilder;
 use crate::client::signer::Signer;
 use crate::define::HttpFn;
 use anyhow::anyhow;
-use openapi_util::time::time::current_timestamp;
+use openapi_util::time::current_timestamp;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::collections::HashMap;
 use std::env;
@@ -25,7 +25,6 @@ impl OpenApiClient {
         Self {
             config: open_api_config,
             signer: Signer::new(&app_key, &app_secret),
-            ..Default::default()
         }
     }
 
@@ -41,7 +40,7 @@ impl OpenApiClient {
         for (k, v) in default_headers {
             headers.insert(
                 HeaderName::from_bytes(k.as_bytes())?,
-                HeaderValue::from_str(&*v)?,
+                HeaderValue::from_str(&v)?,
             );
         }
 
@@ -77,7 +76,7 @@ impl OpenApiClient {
             ));
         }
 
-        Ok(resp_fn(response).await?)
+        resp_fn(response).await
     }
 }
 

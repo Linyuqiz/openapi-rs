@@ -1,7 +1,7 @@
 use openapi_common::define::{
     AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
 };
-use openapi_model::job::job::JobInfo;
+use openapi_model::job::JobInfo;
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
 
