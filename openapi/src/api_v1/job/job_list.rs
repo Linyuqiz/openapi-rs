@@ -16,6 +16,9 @@ pub struct JobListRequest {
 }
 
 impl JobListRequest {
+    pub fn new() -> Self {
+        Self::default()
+    }
     pub fn with_job_state(mut self, job_state: String) -> Self {
         self.job_state = Some(job_state);
         self
@@ -67,7 +70,7 @@ impl HttpBuilder for JobListRequest {
                 BaseRequest {
                     method: Method::GET,
                     uri: "/api/jobs".to_string(),
-                    query_params: Some(query_params),
+                    queries: Some(query_params),
                     ..Default::default()
                 }
             });
@@ -89,12 +92,13 @@ mod tests {
     async fn test_job_get() -> anyhow::Result<()> {
         tracing_subscriber::fmt::init();
         dotenvy::dotenv()?;
-        let config = OpenApiConfig::new().load_from_env()?.builder();
+        let config = OpenApiConfig::new().load_from_env()?;
         let mut client = OpenApiClient::new(config);
 
-        let http_fn = JobListRequest::default().builder();
+        let http_fn = JobListRequest::new().builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
+
         Ok(())
     }
 }

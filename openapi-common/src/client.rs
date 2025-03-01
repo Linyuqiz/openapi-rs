@@ -1,5 +1,5 @@
 use crate::config::OpenApiConfig;
-use crate::define::HttpFn;
+use crate::define::{BaseRequest, HttpFn};
 use crate::request::HttpBuilder;
 use crate::signer::Signer;
 use anyhow::anyhow;
@@ -29,37 +29,14 @@ impl OpenApiClient {
         R: std::fmt::Debug + Send + 'static,
     {
         let (req_fn, resp_fn) = http_fn();
-        let request = req_fn();
+        let mut base_request = req_fn();
 
-        let default_headers = init_headers(&self.config)?;
-        let mut headers = HeaderMap::new();
-        for (k, v) in default_headers {
-            headers.insert(
-                HeaderName::from_bytes(k.as_bytes())?,
-                HeaderValue::from_str(&v)?,
-            );
-        }
-
-        let mut default_query_params = init_query_params(&self.config)?;
-        if let Some(ref query_params) = request.query_params {
-            for (k, v) in query_params {
-                default_query_params.insert(k.to_string(), v.to_string());
-            }
-        }
-        let signature = self.signer.sign_request(&request, &default_query_params)?;
-        default_query_params.insert("Signature".to_string(), signature);
-        let url = format!(
-            "{}{}?{}",
-            self.config.endpoint,
-            request.uri,
-            serde_urlencoded::to_string(&default_query_params)?
-        );
+        self.default_headers_queries(&mut base_request)?;
 
         let response = HttpBuilder::new()
-            .builder()
-            .get(&url)
-            .headers(headers)
-            .form(&default_query_params)
+            .with_base_url(self.config.endpoint.clone())
+            .with_base_request(base_request)
+            .builder()?
             .send()
             .await?;
 
@@ -74,9 +51,37 @@ impl OpenApiClient {
 
         resp_fn(response).await
     }
+
+    fn default_headers_queries(&mut self, base_request: &mut BaseRequest) -> anyhow::Result<()> {
+        let mut headers = HeaderMap::new();
+        default_headers(&self.config)?.iter().for_each(|(k, v)| {
+            headers.insert(
+                HeaderName::from_bytes(k.as_bytes()).unwrap(),
+                HeaderValue::from_str(v).unwrap(),
+            );
+        });
+
+        let mut default_queries = default_queries(&self.config)?;
+        if let Some(ref queries) = base_request.queries {
+            queries.iter().for_each(|(k, v)| {
+                default_queries.insert(k.to_string(), v.to_string());
+            });
+        }
+
+        // add signature
+        default_queries.insert(
+            "Signature".to_string(),
+            self.signer.sign_request(base_request, &default_queries)?,
+        );
+
+        base_request.headers = headers.clone();
+        base_request.queries = Some(default_queries.clone());
+
+        Ok(())
+    }
 }
 
-fn init_headers(config: &OpenApiConfig) -> anyhow::Result<HashMap<String, String>> {
+fn default_headers(config: &OpenApiConfig) -> anyhow::Result<HashMap<String, String>> {
     let mut headers = HashMap::new();
     let user_id = config.user_id.clone();
     headers.insert("x-ys-user-id".to_string(), user_id);
@@ -85,7 +90,7 @@ fn init_headers(config: &OpenApiConfig) -> anyhow::Result<HashMap<String, String
     Ok(headers)
 }
 
-fn init_query_params(config: &OpenApiConfig) -> anyhow::Result<HashMap<String, String>> {
+fn default_queries(config: &OpenApiConfig) -> anyhow::Result<HashMap<String, String>> {
     let mut query_params = HashMap::new();
     let app_key = config.app_key.clone();
     query_params.insert("AppKey".to_string(), app_key);

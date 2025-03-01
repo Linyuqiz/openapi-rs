@@ -1,3 +1,3 @@
-pub mod decrypt;
-pub mod encrypt;
+pub mod md5;
+pub mod sha1;
 pub mod time;

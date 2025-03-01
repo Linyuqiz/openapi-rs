@@ -39,10 +39,6 @@ impl OpenApiConfig {
         self
     }
 
-    pub fn builder(self) -> OpenApiConfig {
-        self
-    }
-
     pub fn load_from_env(&mut self) -> anyhow::Result<Self> {
         Ok(Self {
             app_key: env::var("OpenApiAppKey")?,

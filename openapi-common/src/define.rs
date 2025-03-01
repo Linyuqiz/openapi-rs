@@ -1,3 +1,4 @@
+use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::pin::Pin;
@@ -22,10 +23,11 @@ pub struct BaseRequest {
     pub method: reqwest::Method,
     pub uri: String,
 
-    pub headers: Option<HashMap<String, String>>,
+    // pub headers: Option<HashMap<String, String>>,
+    pub headers: HeaderMap<HeaderValue>,
     pub content_type: Option<String>,
 
-    pub query_params: Option<HashMap<String, String>>,
+    pub queries: Option<HashMap<String, String>>,
     pub form: Option<HashMap<String, String>>,
     pub body: Option<String>,
 }

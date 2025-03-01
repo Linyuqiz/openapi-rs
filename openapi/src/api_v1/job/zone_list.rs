@@ -10,6 +10,12 @@ use std::collections::HashMap;
 #[serde(default)]
 pub struct ZoneListRequest {}
 
+impl ZoneListRequest {
+    pub fn new() -> Self {
+        Default::default()
+    }
+}
+
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct ZoneListResponse {
@@ -44,12 +50,13 @@ mod tests {
     async fn test_zone_list() -> anyhow::Result<()> {
         tracing_subscriber::fmt::init();
         dotenvy::dotenv()?;
-        let config = OpenApiConfig::new().load_from_env()?.builder();
+        let config = OpenApiConfig::new().load_from_env()?;
         let mut client = OpenApiClient::new(config);
 
-        let http_fn = ZoneListRequest::default().builder();
+        let http_fn = ZoneListRequest::new().builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
+
         Ok(())
     }
 }

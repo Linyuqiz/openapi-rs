@@ -12,6 +12,9 @@ pub struct JobGetRequest {
 }
 
 impl JobGetRequest {
+    pub fn new() -> Self {
+        Self::default()
+    }
     pub fn with_job_id(mut self, job_id: String) -> Self {
         self.job_id = job_id;
         self
@@ -53,14 +56,15 @@ mod tests {
     async fn test_job_get() -> anyhow::Result<()> {
         tracing_subscriber::fmt::init();
         dotenvy::dotenv()?;
-        let config = OpenApiConfig::new().load_from_env()?.builder();
+        let config = OpenApiConfig::new().load_from_env()?;
         let mut client = OpenApiClient::new(config);
 
-        let http_fn = JobGetRequest::default()
+        let http_fn = JobGetRequest::new()
             .with_job_id("5p6nwsYQWaw".to_string())
             .builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
+
         Ok(())
     }
 }

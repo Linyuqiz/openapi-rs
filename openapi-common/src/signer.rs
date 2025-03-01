@@ -1,5 +1,5 @@
 use crate::define::BaseRequest;
-use openapi_util::encrypt::md5::md5;
+use openapi_util::md5::md5;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Write;
@@ -28,10 +28,10 @@ impl Signer {
     }
 
     pub fn sign(&self, query_params: &HashMap<String, String>) -> anyhow::Result<String> {
-        let mut buffer = String::new();
         let mut keys: Vec<String> = query_params.keys().cloned().collect();
         keys.sort();
 
+        let mut buffer = String::new();
         for key in keys {
             if let Some(val) = query_params.get(&key) {
                 write!(buffer, "{}={}", key, val)?;
