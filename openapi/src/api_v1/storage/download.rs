@@ -1,42 +1,52 @@
-use openapi_common::define::{
-    AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
-};
-use openapi_model::job::JobInfo;
+use openapi_common::define::{AsyncResponseFn, BaseRequest, HttpBuilder, HttpFn, RequestFn};
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct JobGetRequest {
-    #[serde(rename = "JobID")]
-    pub job_id: String,
+pub struct DownloadRequest {
+    #[serde(rename = "Path")]
+    pub path: String,
+    #[serde(rename = "Range")]
+    pub range: Option<String>,
+    // Resolver xhttp.ResponseResolver
 }
 
-impl JobGetRequest {
+impl DownloadRequest {
     pub fn new() -> Self {
         Self::default()
     }
-    pub fn with_job_id(mut self, job_id: String) -> Self {
-        self.job_id = job_id;
+    pub fn with_path(mut self, path: String) -> Self {
+        self.path = path;
+        self
+    }
+    pub fn with_range(mut self, range: Option<String>) -> Self {
+        self.range = range;
         self
     }
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct JobGetResponse {
-    #[serde(flatten)]
-    pub job_info: JobInfo,
+pub struct DownloadResponse {
+    #[serde(rename = "FileName")]
+    pub file_name: String,
+    #[serde(rename = "FileType")]
+    pub file_type: String,
+    #[serde(rename = "FileSize")]
+    pub file_size: isize,
+    #[serde(rename = "Data")]
+    pub data: Vec<u8>,
 }
 
-impl HttpBuilder for JobGetRequest {
-    type Response = BaseResponse<JobGetResponse>;
+impl HttpBuilder for DownloadRequest {
+    type Response = DownloadResponse;
 
     fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
             let request_fn: RequestFn = Box::new(move || BaseRequest {
                 method: Method::GET,
-                uri: format!("/api/jobs/{}", self.job_id),
+                uri: "/api/storage/download".to_string(),
                 ..Default::default()
             });
             let response_fn: AsyncResponseFn<Self::Response> =
@@ -60,8 +70,9 @@ mod tests {
         let config = OpenApiConfig::new().load_from_env()?;
         let mut client = OpenApiClient::new(config);
 
-        let http_fn = JobGetRequest::new()
-            .with_job_id("5p6nwsYQWaw".to_string())
+        let http_fn = DownloadRequest::new()
+            .with_path("test.txt".to_string())
+            .with_range(Some("bytes=0-100".to_string()))
             .builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);

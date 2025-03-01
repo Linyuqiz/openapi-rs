@@ -9,9 +9,13 @@ use std::collections::HashMap;
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct JobListRequest {
+    #[serde(rename = "JobState")]
     pub job_state: Option<String>,
+    #[serde(rename = "Zone")]
     pub zone: Option<String>,
+    #[serde(rename = "PageOffset")]
     pub page_offset: Option<isize>,
+    #[serde(rename = "PageSize")]
     pub page_size: Option<isize>,
 }
 

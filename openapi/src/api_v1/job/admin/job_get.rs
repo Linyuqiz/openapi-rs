@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AdminJobGetRequest {
+    #[serde(rename = "JobID")]
     pub job_id: String,
 }
 
