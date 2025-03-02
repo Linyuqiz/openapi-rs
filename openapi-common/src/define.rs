@@ -1,11 +1,20 @@
+use bytes::Bytes;
+use futures::Stream;
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::pin::Pin;
 
+pub type BytesStreamResponse = Pin<Box<dyn Stream<Item = Result<Bytes, reqwest::Error>> + Send>>;
+
 pub trait HttpBuilder {
     type Response;
     fn builder(self) -> HttpFn<Self::Response>;
+}
+
+pub trait HttpStreamBuilder {
+    type Response;
+    fn stream_builder(self) -> HttpFn<Self::Response>;
 }
 
 pub type HttpFn<T> = Box<dyn FnOnce() -> (RequestFn, AsyncResponseFn<T>) + Send + Sync>;
