@@ -1,0 +1,10 @@
+[package]
+name = "openapi-util"
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+anyhow = { workspace = true }
+md-5 = { workspace = true }
+sha1 = { workspace = true }
+hex = { workspace = true }

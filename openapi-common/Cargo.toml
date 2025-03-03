@@ -1,0 +1,15 @@
+[package]
+name = "openapi-common"
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+openapi-util = { path = "../openapi-util" }
+
+reqwest = { workspace = true, features = ["json"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_urlencoded = { workspace = true }
+anyhow = { workspace = true }
+futures = { workspace = true }
+bytes = { workspace = true }

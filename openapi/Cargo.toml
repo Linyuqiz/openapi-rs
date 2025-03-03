@@ -1,0 +1,23 @@
+[package]
+name = "openapi"
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+openapi-macros = { path = "../openapi-macros" }
+openapi-common = { path = "../openapi-common" }
+openapi-model = { path = "../openapi-model" }
+openapi-util = { path = "../openapi-util" }
+
+tokio = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+derive_more = { workspace = true }
+bytes = { workspace = true }
+regex = { workspace = true }
+anyhow = { workspace = true }
+dotenvy = { workspace = true }
+futures-util = { workspace = true }
