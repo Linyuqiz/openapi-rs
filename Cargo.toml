@@ -29,6 +29,7 @@ dotenvy = "0.15.7"
 serde_urlencoded = "0.7"
 derive_more = { version = "1.0.0", features = ["full"] }
 futures = "0.3"
+futures-util = "0.3"
 bytes = "1"
 regex = "1"
 md-5 = "0.10"
