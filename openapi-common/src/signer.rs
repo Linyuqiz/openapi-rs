@@ -23,16 +23,18 @@ impl Signer {
     pub fn sign_request(
         &self,
         base_request: &BaseRequest,
-        queries: &mut HashMap<String, String>,
+        queries: &HashMap<String, String>,
     ) -> anyhow::Result<String> {
+        let mut queries = queries.clone();
         if !base_request.body.is_empty() {
             if let Some(content_type) = &base_request.content_type {
-                if content_type.as_str() == "application/json" {
-                    queries.insert("_body".to_string(), sha1(from_utf8(&base_request.body)?));
+                if content_type.as_str().starts_with("application/json") {
+                    let c = sha1(from_utf8(&base_request.body)?);
+                    queries.insert("_body".to_string(), c);
                 }
             }
         }
-        self.sign(queries)
+        self.sign(&queries)
     }
 
     pub fn sign(&self, queries: &HashMap<String, String>) -> anyhow::Result<String> {

@@ -83,6 +83,9 @@ impl OpenApiClient {
         base_request.headers.iter().for_each(|(k, v)| {
             headers.insert(k, v.clone());
         });
+        if base_request.content_type.is_none() {
+            base_request.content_type = Some("application/octet-stream".to_string())
+        }
 
         let mut default_queries = default_queries(&self.config)?;
         if let Some(ref queries) = base_request.queries {

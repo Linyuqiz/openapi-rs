@@ -1,5 +1,4 @@
-use md5::Digest;
-use sha1::Sha1;
+use sha1::{Digest, Sha1};
 
 pub fn sha1(content: &str) -> String {
     let mut hasher = Sha1::new();
