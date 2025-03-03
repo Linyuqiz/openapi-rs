@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use openapi_common::define::{
-    AsyncResponseFn, BaseRequest, BytesStreamResponse, HttpBuilder, HttpFn, HttpStreamBuilder,
+    AsyncResponseFn, BaseRequest, BytesStream, HttpBuilder, HttpFn, HttpStreamBuilder,
     RequestFn,
 };
 use regex::Regex;
@@ -121,7 +121,7 @@ impl HttpBuilder for DownloadRequest {
 // #[serde(default)]
 pub struct DownloadStreamResponse {
     #[debug(skip)]
-    pub stream: Option<BytesStreamResponse>,
+    pub stream: Option<BytesStream>,
 }
 
 impl HttpStreamBuilder for DownloadRequest {

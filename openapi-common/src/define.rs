@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::pin::Pin;
 
-pub type BytesStreamResponse = Pin<Box<dyn Stream<Item = Result<Bytes, reqwest::Error>> + Send>>;
+pub type BytesStream = Pin<Box<dyn Stream<Item = Result<Bytes, reqwest::Error>> + Send>>;
 
 pub trait HttpBuilder {
     type Response;
@@ -38,7 +38,7 @@ pub struct BaseRequest {
 
     pub queries: Option<HashMap<String, String>>,
     pub form: Option<HashMap<String, String>>,
-    pub body: Option<String>,
+    pub body: Option<Bytes>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]

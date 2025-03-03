@@ -75,7 +75,7 @@ impl OpenApiClient {
         for (k, v) in default_headers(&self.config)? {
             headers.insert(
                 HeaderName::from_bytes(k.as_bytes())?,
-                HeaderValue::from_str(&*v)?,
+                HeaderValue::from_str(&v)?,
             );
         }
         base_request.headers.iter().for_each(|(k, v)| {
