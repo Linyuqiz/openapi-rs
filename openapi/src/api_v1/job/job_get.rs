@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 #[serde(default)]
 pub struct JobGetRequest {
     #[serde(rename = "JobID")]
-    pub job_id: String,
+    pub job_id: Option<String>,
 }
 
 impl JobGetRequest {
@@ -17,7 +17,7 @@ impl JobGetRequest {
         Self::default()
     }
     pub fn with_job_id(mut self, job_id: String) -> Self {
-        self.job_id = job_id;
+        self.job_id = Some(job_id);
         self
     }
 }
@@ -34,10 +34,16 @@ impl HttpBuilder for JobGetRequest {
 
     fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
-            let request_fn: RequestFn = Box::new(move || BaseRequest {
-                method: Method::GET,
-                uri: format!("/api/jobs/{}", self.job_id),
-                ..Default::default()
+            let request_fn: RequestFn = Box::new(move || {
+                let mut uri = "/api/jobs".to_string();
+                if let Some(job_id) = self.job_id {
+                    uri += &format!("/{}", job_id);
+                }
+                BaseRequest {
+                    method: Method::GET,
+                    uri,
+                    ..Default::default()
+                }
             });
             let response_fn: AsyncResponseFn<Self::Response> =
                 Box::new(|response: Response| Box::pin(async move { Ok(response.json().await?) }));

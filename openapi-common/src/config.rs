@@ -5,8 +5,20 @@ pub struct OpenApiConfig {
     pub app_key: String,
     pub app_secret: String,
     pub endpoint: String,
+    pub cloud_endpoint: String,
+    pub hpc_endpoint: String,
+    pub sync_endpoint: String,
     pub user_id: String,
     pub zone: String,
+}
+
+#[derive(Debug, Default)]
+pub enum EndpointType {
+    #[default]
+    Api,
+    Cloud,
+    Hpc,
+    Sync,
 }
 
 impl OpenApiConfig {
@@ -29,6 +41,16 @@ impl OpenApiConfig {
         self
     }
 
+    pub fn with_cloud_endpoint(mut self, cloud_endpoint: String) -> Self {
+        self.cloud_endpoint = cloud_endpoint;
+        self
+    }
+
+    pub fn with_hpc_endpoint(mut self, hpc_endpoint: String) -> Self {
+        self.hpc_endpoint = hpc_endpoint;
+        self
+    }
+
     pub fn with_user_id(mut self, user_id: String) -> Self {
         self.user_id = user_id;
         self
@@ -44,6 +66,9 @@ impl OpenApiConfig {
             app_key: env::var("OpenApiAppKey")?,
             app_secret: env::var("OpenApiAppSecret")?,
             endpoint: env::var("OpenApiEndpoint")?,
+            cloud_endpoint: env::var("OpenApiCloudEndpoint")?,
+            hpc_endpoint: env::var("OpenApiHpcEndpoint")?,
+            sync_endpoint: env::var("OpenApiSyncEndpoint")?,
             user_id: env::var("OpenApiUserId")?,
             zone: env::var("OpenApiZone")?,
         })

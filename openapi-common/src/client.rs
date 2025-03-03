@@ -1,4 +1,4 @@
-use crate::config::OpenApiConfig;
+use crate::config::{EndpointType, OpenApiConfig};
 use crate::define::{BaseRequest, HttpFn};
 use crate::request::HttpBuilder;
 use crate::signer::Signer;
@@ -12,6 +12,8 @@ use std::env;
 pub struct OpenApiClient {
     config: OpenApiConfig,
     signer: Signer,
+
+    endpoint_type: EndpointType,
 }
 
 impl OpenApiClient {
@@ -21,7 +23,13 @@ impl OpenApiClient {
         Self {
             config: open_api_config,
             signer: Signer::new(&app_key, &app_secret),
+            ..Default::default()
         }
+    }
+
+    pub fn with_endpoint_type(mut self, endpoint_type: EndpointType) -> Self {
+        self.endpoint_type = endpoint_type;
+        self
     }
 
     pub async fn send<R>(&mut self, http_fn: HttpFn<R>) -> anyhow::Result<R>
@@ -33,8 +41,15 @@ impl OpenApiClient {
 
         self.default_headers_queries(&mut base_request)?;
 
+        let endpoint = match self.endpoint_type {
+            EndpointType::Api => self.config.endpoint.clone(),
+            EndpointType::Cloud => self.config.cloud_endpoint.clone(),
+            EndpointType::Hpc => self.config.hpc_endpoint.clone(),
+            EndpointType::Sync => self.config.sync_endpoint.clone(),
+        };
+
         let response = HttpBuilder::new()
-            .with_base_url(self.config.endpoint.clone())
+            .with_base_url(endpoint)
             .with_base_request(base_request)
             .builder()?
             .send()
@@ -52,13 +67,19 @@ impl OpenApiClient {
         resp_fn(response).await
     }
 
-    fn default_headers_queries(&mut self, base_request: &mut BaseRequest) -> anyhow::Result<()> {
+    fn default_headers_queries(
+        &mut self,
+        base_request: &mut BaseRequest,
+    ) -> Result<(), anyhow::Error> {
         let mut headers = HeaderMap::new();
-        default_headers(&self.config)?.iter().for_each(|(k, v)| {
+        for (k, v) in default_headers(&self.config)? {
             headers.insert(
-                HeaderName::from_bytes(k.as_bytes()).unwrap(),
-                HeaderValue::from_str(v).unwrap(),
+                HeaderName::from_bytes(k.as_bytes())?,
+                HeaderValue::from_str(&*v)?,
             );
+        }
+        base_request.headers.iter().for_each(|(k, v)| {
+            headers.insert(k, v.clone());
         });
 
         let mut default_queries = default_queries(&self.config)?;
@@ -68,7 +89,7 @@ impl OpenApiClient {
             });
         }
 
-        // add signature
+        // signature
         default_queries.insert(
             "Signature".to_string(),
             self.signer.sign_request(base_request, &default_queries)?,

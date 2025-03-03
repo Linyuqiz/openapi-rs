@@ -12,11 +12,11 @@ use std::collections::HashMap;
 #[serde(default)]
 pub struct DownloadRequest {
     #[serde(rename = "Path")]
-    pub path: String,
+    pub path: Option<String>,
     #[serde(rename = "RangeStart")]
-    pub range_start: isize,
+    pub range_start: Option<isize>,
     #[serde(rename = "RangeEnd")]
-    pub range_end: isize,
+    pub range_end: Option<isize>,
 }
 
 impl DownloadRequest {
@@ -24,27 +24,31 @@ impl DownloadRequest {
         Default::default()
     }
     pub fn with_path(mut self, path: String) -> Self {
-        self.path = path;
+        self.path = Some(path);
         self
     }
     pub fn with_range_start(mut self, range_start: isize) -> Self {
-        self.range_start = range_start;
+        self.range_start = Some(range_start);
         self
     }
     pub fn with_range_end(mut self, range_end: isize) -> Self {
-        self.range_end = range_end;
+        self.range_end = Some(range_end);
         self
     }
 
     fn request_fn(self) -> RequestFn {
         let request_fn: RequestFn = Box::new(move || {
             let mut queries = HashMap::new();
-            queries.insert("Path".to_string(), self.path.clone());
-            if self.range_start >= 0 && self.range_end >= 0 {
-                queries.insert(
-                    "Range".to_string(),
-                    format!("bytes={}-{}", self.range_start, self.range_end),
-                );
+            if let Some(path) = &self.path {
+                queries.insert("Path".to_string(), path.clone());
+            }
+            if let Some(range_start) = self.range_start {
+                if let Some(range_end) = self.range_end {
+                    queries.insert(
+                        "Range".to_string(),
+                        format!("bytes={}-{}", range_start, range_end),
+                    );
+                }
             }
             BaseRequest {
                 method: Method::GET,
@@ -141,7 +145,7 @@ impl HttpStreamBuilder for DownloadRequest {
 mod tests {
     use super::*;
     use openapi_common::client::OpenApiClient;
-    use openapi_common::config::OpenApiConfig;
+    use openapi_common::config::{EndpointType, OpenApiConfig};
     use tracing::info;
 
     #[tokio::test]
@@ -150,7 +154,7 @@ mod tests {
         dotenvy::dotenv()?;
         let config = OpenApiConfig::new().load_from_env()?;
         let user_id = config.user_id.clone();
-        let mut client = OpenApiClient::new(config);
+        let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
         let http_fn = DownloadRequest::new()
             .with_path(format!("{}/download", user_id))
@@ -167,7 +171,7 @@ mod tests {
         dotenvy::dotenv()?;
         let config = OpenApiConfig::new().load_from_env()?;
         let user_id = config.user_id.clone();
-        let mut client = OpenApiClient::new(config);
+        let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
         let http_fn = DownloadRequest::new()
             .with_path(format!("{}/download", user_id))
