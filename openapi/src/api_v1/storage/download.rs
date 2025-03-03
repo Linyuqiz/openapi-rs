@@ -155,7 +155,7 @@ mod tests {
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
         let http_fn = DownloadRequest::new()
-            .with_path(format!("/{}/run.tcl", user_id))
+            .with_path(format!("/{}/runner.py", user_id))
             .builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
@@ -172,7 +172,7 @@ mod tests {
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
         let http_fn = DownloadRequest::new()
-            .with_path(format!("/{}/run.tcl", user_id))
+            .with_path(format!("/{}/runner.py", user_id))
             .stream_builder();
         let mut response = client.send(http_fn).await?;
         while let Some(data) = response

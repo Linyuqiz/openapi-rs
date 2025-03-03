@@ -88,8 +88,8 @@ mod tests {
 
         let http_fn = UploadRequest::new()
             .with_path(format!("/{}/runner.py", user_id))
-            .with_content("print('hello world')".as_bytes().to_vec())
-            .with_overwrite(false)
+            .with_content("print('hello world!')".as_bytes().to_vec())
+            .with_overwrite(true)
             .builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);

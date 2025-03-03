@@ -32,7 +32,6 @@ pub struct BaseRequest {
     pub method: reqwest::Method,
     pub uri: String,
 
-    // pub headers: Option<HashMap<String, String>>,
     pub headers: HeaderMap<HeaderValue>,
     pub content_type: Option<String>,
 

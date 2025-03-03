@@ -36,13 +36,11 @@ impl HttpBuilder {
             Method::GET => Ok(self
                 .http_client
                 .get(&url)
-                .headers(self.base_request.headers.clone())
-                .form(&self.base_request.queries)),
+                .headers(self.base_request.headers.clone())),
             Method::POST => Ok(self
                 .http_client
                 .post(&url)
                 .headers(self.base_request.headers.clone())
-                .form(&self.base_request.queries)
                 .body(self.base_request.body)),
             _ => Err(anyhow::anyhow!("unsupported method")),
         }

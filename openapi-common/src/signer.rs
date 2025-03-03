@@ -38,11 +38,6 @@ impl Signer {
     }
 
     pub fn sign(&self, queries: &HashMap<String, String>) -> anyhow::Result<String> {
-        // let mut keys = queries
-        //     .iter()
-        //     .filter(|(k, v)| !k.eq("Signature".to_string().as_ref()))
-        //     .collect::<Vec<&String>>();
-        // let mut keys: Vec<String> = queries.keys().cloned().collect();
         let mut keys: Vec<String> = queries
             .keys()
             .filter(|k| !k.as_str().eq("Signature"))
