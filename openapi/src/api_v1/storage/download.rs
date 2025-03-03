@@ -141,9 +141,9 @@ impl HttpStreamBuilder for DownloadRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use futures_util::stream::StreamExt;
     use openapi_common::client::OpenApiClient;
     use openapi_common::config::{EndpointType, OpenApiConfig};
-    use futures_util::stream::StreamExt;
     use tracing::info;
 
     #[tokio::test]

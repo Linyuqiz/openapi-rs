@@ -39,6 +39,8 @@ impl OpenApiClient {
         let (req_fn, resp_fn) = http_fn();
         let mut base_request = req_fn();
 
+        dbg!(&base_request);
+
         self.default_headers_queries(&mut base_request)?;
 
         let endpoint = match self.endpoint_type {
@@ -90,10 +92,10 @@ impl OpenApiClient {
         }
 
         // signature
-        default_queries.insert(
-            "Signature".to_string(),
-            self.signer.sign_request(base_request, &default_queries)?,
-        );
+        let signature = self
+            .signer
+            .sign_request(base_request, &mut default_queries)?;
+        default_queries.insert("Signature".to_string(), signature.to_string());
 
         base_request.headers = headers.clone();
         base_request.queries = Some(default_queries.clone());

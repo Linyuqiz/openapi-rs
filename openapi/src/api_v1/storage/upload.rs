@@ -87,8 +87,8 @@ mod tests {
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
         let http_fn = UploadRequest::new()
-            .with_path(format!("{}/upload", user_id))
-            .with_content(vec![1, 2, 3, 4, 5])
+            .with_path(format!("/{}/runner.py", user_id))
+            .with_content("print('hello world')".as_bytes().to_vec())
             .with_overwrite(false)
             .builder();
         let response = client.send(http_fn).await?;
