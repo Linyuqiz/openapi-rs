@@ -42,7 +42,8 @@ impl HttpBuilder {
                 .http_client
                 .post(&url)
                 .headers(self.base_request.headers.clone())
-                .form(&self.base_request.queries)),
+                .form(&self.base_request.queries)
+                .body(self.base_request.body)),
             _ => Err(anyhow::anyhow!("unsupported method")),
         }
     }

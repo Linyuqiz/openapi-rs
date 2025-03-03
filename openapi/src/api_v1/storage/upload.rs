@@ -54,13 +54,13 @@ impl HttpBuilder for UploadRequest {
                 }
                 let mut body = Bytes::new();
                 if let Some(content) = &self.content {
-                    body = Bytes::from(content.to_vec());
+                    body = Bytes::from(content.clone());
                 }
                 BaseRequest {
-                    method: Method::GET,
+                    method: Method::POST,
                     uri: "/api/storage/upload/file".to_string(),
                     queries: Some(queries),
-                    body: Some(body),
+                    body,
                     ..Default::default()
                 }
             });

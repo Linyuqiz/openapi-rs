@@ -1,7 +1,6 @@
 use bytes::Bytes;
 use openapi_common::define::{
-    AsyncResponseFn, BaseRequest, BytesStream, HttpBuilder, HttpFn, HttpStreamBuilder,
-    RequestFn,
+    AsyncResponseFn, BaseRequest, BytesStream, HttpBuilder, HttpFn, HttpStreamBuilder, RequestFn,
 };
 use regex::Regex;
 use reqwest::{Method, Response};
@@ -116,9 +115,7 @@ impl HttpBuilder for DownloadRequest {
     }
 }
 
-// #[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[derive(Default, derive_more::Debug)]
-// #[serde(default)]
+#[derive(derive_more::Debug, Default)]
 pub struct DownloadStreamResponse {
     #[debug(skip)]
     pub stream: Option<BytesStream>,
@@ -146,6 +143,7 @@ mod tests {
     use super::*;
     use openapi_common::client::OpenApiClient;
     use openapi_common::config::{EndpointType, OpenApiConfig};
+    use futures_util::stream::StreamExt;
     use tracing::info;
 
     #[tokio::test]
@@ -157,7 +155,7 @@ mod tests {
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
         let http_fn = DownloadRequest::new()
-            .with_path(format!("{}/download", user_id))
+            .with_path(format!("/{}/run.tcl", user_id))
             .builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
@@ -174,10 +172,18 @@ mod tests {
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
         let http_fn = DownloadRequest::new()
-            .with_path(format!("{}/download", user_id))
+            .with_path(format!("/{}/run.tcl", user_id))
             .stream_builder();
-        let response = client.send(http_fn).await?;
-        info!("response: {:#?}", response);
+        let mut response = client.send(http_fn).await?;
+        while let Some(data) = response
+            .stream
+            .as_mut()
+            .expect("stream not found")
+            .next()
+            .await
+        {
+            info!("data: {:#?}", data?);
+        }
 
         Ok(())
     }

@@ -38,7 +38,7 @@ pub struct BaseRequest {
 
     pub queries: Option<HashMap<String, String>>,
     pub form: Option<HashMap<String, String>>,
-    pub body: Option<Bytes>,
+    pub body: Bytes,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]

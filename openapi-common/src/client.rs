@@ -112,10 +112,12 @@ fn default_headers(config: &OpenApiConfig) -> anyhow::Result<HashMap<String, Str
 }
 
 fn default_queries(config: &OpenApiConfig) -> anyhow::Result<HashMap<String, String>> {
-    let mut query_params = HashMap::new();
+    let mut queries = HashMap::new();
     let app_key = config.app_key.clone();
-    query_params.insert("AppKey".to_string(), app_key);
+    queries.insert("AppKey".to_string(), app_key);
+    let x_ys_version = env::var("XYsVersion")?;
+    queries.insert("X-Ys-Version".to_string(), x_ys_version);
     let timestamp = current_timestamp()?;
-    query_params.insert("Timestamp".to_string(), timestamp);
-    Ok(query_params)
+    queries.insert("Timestamp".to_string(), timestamp);
+    Ok(queries)
 }
