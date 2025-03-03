@@ -29,8 +29,7 @@ impl Signer {
         if !base_request.body.is_empty() {
             if let Some(content_type) = &base_request.content_type {
                 if content_type.as_str().starts_with("application/json") {
-                    let c = sha1(from_utf8(&base_request.body)?);
-                    queries.insert("_body".to_string(), c);
+                    queries.insert("_body".to_string(), sha1(from_utf8(&base_request.body)?));
                 }
             }
         }

@@ -2,7 +2,6 @@ use crate::config::{EndpointType, OpenApiConfig};
 use crate::define::{BaseRequest, HttpFn};
 use crate::request::HttpBuilder;
 use crate::signer::Signer;
-use anyhow::anyhow;
 use openapi_util::time::current_timestamp;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::collections::HashMap;
@@ -59,13 +58,6 @@ impl OpenApiClient {
 
         dbg!(&response);
 
-        if !response.status().is_success() {
-            return Err(anyhow!(
-                "failed to send request: {}",
-                response.status().to_string()
-            ));
-        }
-
         resp_fn(response).await
     }
 
@@ -86,6 +78,10 @@ impl OpenApiClient {
         if base_request.content_type.is_none() {
             base_request.content_type = Some("application/octet-stream".to_string())
         }
+        headers.insert(
+            HeaderName::from_bytes("Content-Type".as_bytes())?,
+            HeaderValue::from_str(base_request.content_type.as_ref().unwrap())?,
+        );
 
         let mut default_queries = default_queries(&self.config)?;
         if let Some(ref queries) = base_request.queries {
@@ -95,12 +91,12 @@ impl OpenApiClient {
         }
 
         // signature
-        let signature = self
-            .signer
-            .sign_request(base_request, &mut default_queries)?;
+        let signature = self.signer.sign_request(base_request, &default_queries)?;
         default_queries.insert("Signature".to_string(), signature.to_string());
 
         base_request.headers = headers.clone();
+        let x_ys_version = env::var("XYsVersion")?;
+        default_queries.insert("X-Ys-Version".to_string(), x_ys_version);
         base_request.queries = Some(default_queries.clone());
 
         Ok(())
