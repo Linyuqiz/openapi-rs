@@ -2,10 +2,13 @@
 name = "openapi-common"
 version = { workspace = true }
 edition = { workspace = true }
+description = "Common types and traits for OpenAPI implementation"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Linyuqiz/openapi-rs"
+keywords = ["openapi", "api"]
+categories = ["web-programming"]
 
 [dependencies]
-openapi-util = { path = "../openapi-util" }
-
 reqwest = { workspace = true, features = ["json"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
@@ -13,3 +16,6 @@ serde_urlencoded = { workspace = true }
 anyhow = { workspace = true }
 futures = { workspace = true }
 bytes = { workspace = true }
+md-5 = { workspace = true }
+sha1 = { workspace = true }
+hex = { workspace = true }

@@ -2,5 +2,8 @@
 name = "openapi-isync"
 version = { workspace = true }
 edition = { workspace = true }
+description = "A Rust library for generating OpenAPI clients and servers."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Linyuqiz/openapi-rs"
 
 [dependencies]

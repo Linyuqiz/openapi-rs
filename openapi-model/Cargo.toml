@@ -2,6 +2,9 @@
 name = "openapi-model"
 version = { workspace = true }
 edition = { workspace = true }
+description = "Data model for OpenAPI specification"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Linyuqiz/openapi-rs"
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }

@@ -2,13 +2,12 @@
 resolver = "2"
 members = [
     "examples/*",
-    "openapi",
+    "openapi-rs",
     "openapi-common",
     "openapi-isync",
     "openapi-macros",
     "openapi-model",
     "openapi-tool",
-    "openapi-util",
 ]
 exclude = []
 

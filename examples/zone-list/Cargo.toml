@@ -4,7 +4,7 @@ version = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
-openapi = { path = "../../openapi" }
+openapi-rs = { path = "../../openapi-rs" }
 openapi-common = { path = "../../openapi-common" }
 
 tokio = { workspace = true }

@@ -1,13 +1,15 @@
 [package]
-name = "openapi"
+name = "openapi-rs"
 version = { workspace = true }
 edition = { workspace = true }
+description = "A Rust library for OpenAPI specification"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Linyuqiz/openapi-rs"
 
 [dependencies]
-openapi-macros = { path = "../openapi-macros" }
-openapi-common = { path = "../openapi-common" }
-openapi-model = { path = "../openapi-model" }
-openapi-util = { path = "../openapi-util" }
+openapi-macros = { version = "0.1.0", path = "../openapi-macros" }
+openapi-common = {version = "0.1.0", path = "../openapi-common" }
+openapi-model = { version = "0.1.0",path = "../openapi-model" }
 
 tokio = { workspace = true }
 reqwest = { workspace = true }
@@ -21,3 +23,6 @@ regex = { workspace = true }
 anyhow = { workspace = true }
 dotenvy = { workspace = true }
 futures-util = { workspace = true }
+
+[features]
+default = []
