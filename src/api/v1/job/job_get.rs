@@ -1,7 +1,7 @@
-use openapi_common::define::{
+use crate::common::define::{
     AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
 };
-use openapi_model::job::JobInfo;
+use crate::model::job::JobInfo;
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
 
@@ -55,8 +55,8 @@ impl HttpBuilder for JobGetRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use openapi_common::client::OpenApiClient;
-    use openapi_common::config::OpenApiConfig;
+    use crate::common::client::OpenApiClient;
+    use crate::common::config::OpenApiConfig;
     use tracing::info;
 
     #[tokio::test]

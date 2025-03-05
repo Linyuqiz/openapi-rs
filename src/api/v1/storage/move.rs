@@ -1,7 +1,7 @@
-use bytes::Bytes;
-use openapi_common::define::{
+use crate::common::define::{
     AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
 };
+use bytes::Bytes;
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
 
@@ -57,8 +57,8 @@ impl HttpBuilder for MoveRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use openapi_common::client::OpenApiClient;
-    use openapi_common::config::{EndpointType, OpenApiConfig};
+    use crate::common::client::OpenApiClient;
+    use crate::common::config::{EndpointType, OpenApiConfig};
     use tracing::info;
 
     #[tokio::test]

@@ -1,10 +1,10 @@
-use crate::define::BaseRequest;
+use crate::common::define::BaseRequest;
+use crate::common::md5::md5;
+use crate::common::sha1::sha1;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Write;
 use std::str::from_utf8;
-use crate::md5::md5;
-use crate::sha1::sha1;
 
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct Signer {

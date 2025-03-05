@@ -1,20 +1,23 @@
-use bytes::Bytes;
-use openapi_common::define::{
+use crate::common::define::{
     AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
 };
+use bytes::Bytes;
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct RemoveRequest {
+pub struct UploadRequest {
     #[serde(rename = "Path")]
-    pub path: Option<String>,
-    #[serde(rename = "IgnoreNotExist")]
-    pub ignore_not_exist: Option<bool>,
+    path: Option<String>,
+    #[serde(rename = "Content")]
+    content: Option<Vec<u8>>,
+    #[serde(rename = "Overwrite")]
+    overwrite: Option<bool>,
 }
 
-impl RemoveRequest {
+impl UploadRequest {
     pub fn new() -> Self {
         Default::default()
     }
@@ -22,28 +25,42 @@ impl RemoveRequest {
         self.path = Some(path);
         self
     }
-    pub fn with_ignore_not_exist(mut self, ignore_not_exist: bool) -> Self {
-        self.ignore_not_exist = Some(ignore_not_exist);
+    pub fn with_content(mut self, content: Vec<u8>) -> Self {
+        self.content = Some(content);
+        self
+    }
+    pub fn with_overwrite(mut self, overwrite: bool) -> Self {
+        self.overwrite = Some(overwrite);
         self
     }
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct RemoveResponse {}
+pub struct UploadResponse {}
 
-impl HttpBuilder for RemoveRequest {
-    type Response = BaseResponse<RemoveResponse>;
+impl HttpBuilder for UploadRequest {
+    type Response = BaseResponse<UploadResponse>;
 
     fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
             let request_fn: RequestFn = Box::new(move || {
-                let body_content = serde_json::to_vec(&self).unwrap();
+                let mut queries = HashMap::new();
+                if let Some(path) = &self.path {
+                    queries.insert("Path".to_string(), path.clone());
+                }
+                if let Some(overwrite) = self.overwrite {
+                    queries.insert("Overwrite".to_string(), overwrite.to_string());
+                }
+                let mut body = Bytes::new();
+                if let Some(content) = &self.content {
+                    body = Bytes::from(content.clone());
+                }
                 BaseRequest {
                     method: Method::POST,
-                    uri: "/api/storage/rm".to_string(),
-                    content_type: Some("application/json".to_string()),
-                    body: Bytes::from(body_content),
+                    uri: "/api/storage/upload/file".to_string(),
+                    queries: Some(queries),
+                    body,
                     ..Default::default()
                 }
             });
@@ -57,21 +74,22 @@ impl HttpBuilder for RemoveRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use openapi_common::client::OpenApiClient;
-    use openapi_common::config::{EndpointType, OpenApiConfig};
+    use crate::common::client::OpenApiClient;
+    use crate::common::config::{EndpointType, OpenApiConfig};
     use tracing::info;
 
     #[tokio::test]
-    async fn test_move() -> anyhow::Result<()> {
+    async fn test_upload() -> anyhow::Result<()> {
         tracing_subscriber::fmt::init();
         dotenvy::dotenv()?;
         let config = OpenApiConfig::new().load_from_env()?;
         let user_id = config.user_id.clone();
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
-        let http_fn = RemoveRequest::new()
+        let http_fn = UploadRequest::new()
             .with_path(format!("/{}/runner.py", user_id))
-            .with_ignore_not_exist(true)
+            .with_content("print('hello world!')".as_bytes().to_vec())
+            .with_overwrite(true)
             .builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);

@@ -1,4 +1,4 @@
-use crate::define::BaseRequest;
+use crate::common::define::BaseRequest;
 use reqwest::{Client, Method, RequestBuilder};
 
 #[derive(Debug, Default)]

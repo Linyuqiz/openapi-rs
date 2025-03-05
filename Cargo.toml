@@ -1,22 +1,12 @@
-[workspace]
-resolver = "2"
-members = [
-    "examples/*",
-    "openapi-rs",
-    "openapi-common",
-    "openapi-isync",
-    "openapi-macros",
-    "openapi-model",
-    "openapi-tool",
-]
-exclude = []
-
-[workspace.package]
+[package]
+name = "openapi-rs"
 version = "0.1.0"
 edition = "2024"
-description = "open api for rust"
+description = "A Rust library for OpenAPI specification"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Linyuqiz/openapi-rs"
 
-[workspace.dependencies]
+[dependencies]
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.12", features = ["json", "stream"] }
 serde = { version = "1", features = ["derive"] }

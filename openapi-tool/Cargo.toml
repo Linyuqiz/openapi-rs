@@ -1,6 +1,0 @@
-[package]
-name = "openapi-tool"
-version = { workspace = true }
-edition = { workspace = true }
-
-[dependencies]
