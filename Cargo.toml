@@ -1,3 +1,8 @@
+[workspace]
+resolver = "2"
+members = ["examples/*"]
+exclude = []
+
 [package]
 name = "openapi-rs"
 version = "0.1.1"
@@ -14,9 +19,9 @@ serde_json = "1"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 anyhow = "1"
-dotenvy = "0.15.7"
+dotenvy = "0.15"
 serde_urlencoded = "0.7"
-derive_more = { version = "1.0.0", features = ["full"] }
+derive_more = { version = "1", features = ["full"] }
 futures = "0.3"
 futures-util = "0.3"
 bytes = "1"
