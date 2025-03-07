@@ -8,8 +8,8 @@ use std::str::from_utf8;
 
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct Signer {
-    app_key: String,
-    app_secret: String,
+    pub app_key: String,
+    pub app_secret: String,
 }
 
 impl Signer {

@@ -1,7 +1,3 @@
-# dirs
-.idea
-target
-
-# files
-Cargo.lock
+.idea/
+target/
 .env
