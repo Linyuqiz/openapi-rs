@@ -1,6 +1,6 @@
+use crate::common::crypt::md5::md5;
+use crate::common::crypt::sha1::sha1;
 use crate::common::define::BaseRequest;
-use crate::common::md5::md5;
-use crate::common::sha1::sha1;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Write;
