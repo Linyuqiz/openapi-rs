@@ -1,42 +1,41 @@
 use crate::common::define::{
     AsyncResponseFn, BaseRequest, BaseResponse, HttpBuilder, HttpFn, RequestFn,
 };
-use crate::model::sync::SyncTask;
 use bytes::Bytes;
 use reqwest::{Method, Response};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct SystemSyncBatchGetTaskRequest {
-    #[serde(rename = "JobIds")]
-    pub job_ids: Option<Vec<String>>,
+pub struct InternalMerchMerchandiseUnPublishRequest {
+    #[serde(rename = "MerchandiseId")]
+    pub merchandise_id: Option<String>,
 }
 
-impl SystemSyncBatchGetTaskRequest {
+impl InternalMerchMerchandiseUnPublishRequest {
     pub fn new() -> Self {
         Self::default()
     }
-    pub fn with_job_ids(mut self, job_ids: Vec<String>) -> Self {
-        self.job_ids = Some(job_ids);
+    pub fn with_merchandise_id(mut self, merchandise_id: String) -> Self {
+        self.merchandise_id = Some(merchandise_id);
         self
     }
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct SystemSyncBatchGetTaskResponse {
-    #[serde(flatten)]
-    pub sync_tasks: Vec<SyncTask>,
-}
+pub struct InternalMerchMerchandiseUnPublishResponse {}
 
-impl HttpBuilder for SystemSyncBatchGetTaskRequest {
-    type Response = BaseResponse<SystemSyncBatchGetTaskResponse>;
+impl HttpBuilder for InternalMerchMerchandiseUnPublishRequest {
+    type Response = BaseResponse<InternalMerchMerchandiseUnPublishResponse>;
     fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
             let request_fn: RequestFn = Box::new(move || BaseRequest {
                 method: Method::POST,
-                uri: "/system/sync-task/batch".to_string(),
+                uri: format!(
+                    "/internal/merchandises/{}/unpublish",
+                    self.merchandise_id.clone().unwrap()
+                ),
                 body: Bytes::from(serde_json::to_vec(&self).unwrap()),
                 ..Default::default()
             });
@@ -51,18 +50,18 @@ impl HttpBuilder for SystemSyncBatchGetTaskRequest {
 mod tests {
     use super::*;
     use crate::common::client::OpenApiClient;
-    use crate::common::config::{EndpointType, OpenApiConfig};
+    use crate::common::config::OpenApiConfig;
     use tracing::info;
 
     #[tokio::test]
-    async fn test_system_sync_batch_get_task() -> anyhow::Result<()> {
+    async fn test_internal_merch_merchandise_unpublish() -> anyhow::Result<()> {
         tracing_subscriber::fmt::init();
         dotenvy::dotenv()?;
         let config = OpenApiConfig::new().load_from_env()?;
-        let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Sync);
+        let mut client = OpenApiClient::new(config);
 
-        let http_fn = SystemSyncBatchGetTaskRequest::new()
-            .with_job_ids(vec!["123".to_string()])
+        let http_fn = InternalMerchMerchandiseUnPublishRequest::new()
+            .with_merchandise_id("123".to_string())
             .builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);

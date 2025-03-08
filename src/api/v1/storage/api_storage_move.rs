@@ -62,7 +62,7 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-    async fn test_move() -> anyhow::Result<()> {
+    async fn test_api_storage_move() -> anyhow::Result<()> {
         tracing_subscriber::fmt::init();
         dotenvy::dotenv()?;
         let config = OpenApiConfig::new().load_from_env()?;

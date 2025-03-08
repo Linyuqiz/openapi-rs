@@ -49,7 +49,7 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-    async fn test_job_list() -> anyhow::Result<()> {
+    async fn test_system_sync_resume_task() -> anyhow::Result<()> {
         tracing_subscriber::fmt::init();
         dotenvy::dotenv()?;
         let config = OpenApiConfig::new().load_from_env()?;

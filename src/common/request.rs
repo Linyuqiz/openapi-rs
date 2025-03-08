@@ -47,6 +47,15 @@ impl HttpBuilder {
                 .patch(&url)
                 .headers(self.base_request.headers.clone())
                 .body(self.base_request.body)),
+            Method::DELETE => Ok(self
+                .http_client
+                .delete(&url)
+                .headers(self.base_request.headers.clone())),
+            Method::PUT => Ok(self
+                .http_client
+                .put(&url)
+                .headers(self.base_request.headers.clone())
+                .body(self.base_request.body)),
             _ => Err(anyhow::anyhow!("unsupported method")),
         }
     }

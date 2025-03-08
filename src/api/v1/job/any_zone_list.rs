@@ -47,7 +47,7 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-    async fn test_zone_list() -> anyhow::Result<()> {
+    async fn test_any_zone_list() -> anyhow::Result<()> {
         tracing_subscriber::fmt::init();
         dotenvy::dotenv()?;
         let config = OpenApiConfig::new().load_from_env()?;
