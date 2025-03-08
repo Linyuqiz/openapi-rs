@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct UploadRequest {
+pub struct ApiStorageUploadRequest {
     #[serde(rename = "Path")]
     path: Option<String>,
     #[serde(rename = "Content")]
@@ -17,7 +17,7 @@ pub struct UploadRequest {
     overwrite: Option<bool>,
 }
 
-impl UploadRequest {
+impl ApiStorageUploadRequest {
     pub fn new() -> Self {
         Default::default()
     }
@@ -37,10 +37,10 @@ impl UploadRequest {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct UploadResponse {}
+pub struct ApiStorageUploadResponse {}
 
-impl HttpBuilder for UploadRequest {
-    type Response = BaseResponse<UploadResponse>;
+impl HttpBuilder for ApiStorageUploadRequest {
+    type Response = BaseResponse<ApiStorageUploadResponse>;
 
     fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
@@ -86,7 +86,7 @@ mod tests {
         let user_id = config.user_id.clone();
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
-        let http_fn = UploadRequest::new()
+        let http_fn = ApiStorageUploadRequest::new()
             .with_path(format!("/{}/runner.py", user_id))
             .with_content("print('hello world!')".as_bytes().to_vec())
             .with_overwrite(true)

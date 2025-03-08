@@ -7,14 +7,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct MoveRequest {
+pub struct ApiStorageMoveRequest {
     #[serde(rename = "Src")]
     pub src_path: Option<String>,
     #[serde(rename = "Dest")]
     pub dest_path: Option<String>,
 }
 
-impl MoveRequest {
+impl ApiStorageMoveRequest {
     pub fn new() -> Self {
         Default::default()
     }
@@ -30,10 +30,10 @@ impl MoveRequest {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct MoveResponse {}
+pub struct ApiStorageMoveResponse {}
 
-impl HttpBuilder for MoveRequest {
-    type Response = BaseResponse<MoveResponse>;
+impl HttpBuilder for ApiStorageMoveRequest {
+    type Response = BaseResponse<ApiStorageMoveResponse>;
 
     fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
@@ -69,7 +69,7 @@ mod tests {
         let user_id = config.user_id.clone();
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
-        let http_fn = MoveRequest::new()
+        let http_fn = ApiStorageMoveRequest::new()
             .with_src_path(format!("/{}/runner.py", user_id))
             .with_dest_path(format!("/{}/tmp/runner.py", user_id))
             .builder();

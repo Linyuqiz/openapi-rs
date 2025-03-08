@@ -7,14 +7,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct RemoveRequest {
+pub struct ApiStorageRemoveRequest {
     #[serde(rename = "Path")]
     pub path: Option<String>,
     #[serde(rename = "IgnoreNotExist")]
     pub ignore_not_exist: Option<bool>,
 }
 
-impl RemoveRequest {
+impl ApiStorageRemoveRequest {
     pub fn new() -> Self {
         Default::default()
     }
@@ -30,10 +30,10 @@ impl RemoveRequest {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct RemoveResponse {}
+pub struct ApiStorageRemoveResponse {}
 
-impl HttpBuilder for RemoveRequest {
-    type Response = BaseResponse<RemoveResponse>;
+impl HttpBuilder for ApiStorageRemoveRequest {
+    type Response = BaseResponse<ApiStorageRemoveResponse>;
 
     fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
@@ -69,7 +69,7 @@ mod tests {
         let user_id = config.user_id.clone();
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
-        let http_fn = RemoveRequest::new()
+        let http_fn = ApiStorageRemoveRequest::new()
             .with_path(format!("/{}/runner.py", user_id))
             .with_ignore_not_exist(true)
             .builder();

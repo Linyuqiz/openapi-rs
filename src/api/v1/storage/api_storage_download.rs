@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct DownloadRequest {
+pub struct ApiStorageDownloadRequest {
     #[serde(rename = "Path")]
     pub path: Option<String>,
     #[serde(rename = "RangeStart")]
@@ -18,7 +18,7 @@ pub struct DownloadRequest {
     pub range_end: Option<isize>,
 }
 
-impl DownloadRequest {
+impl ApiStorageDownloadRequest {
     pub fn new() -> Self {
         Default::default()
     }
@@ -62,7 +62,7 @@ impl DownloadRequest {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct DownloadResponse {
+pub struct ApiStorageDownloadResponse {
     #[serde(rename = "FileName")]
     pub file_name: String,
     #[serde(rename = "FileType")]
@@ -73,14 +73,14 @@ pub struct DownloadResponse {
     pub data: Option<Bytes>,
 }
 
-impl HttpBuilder for DownloadRequest {
-    type Response = DownloadResponse;
+impl HttpBuilder for ApiStorageDownloadRequest {
+    type Response = ApiStorageDownloadResponse;
 
     fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
             let response_fn: AsyncResponseFn<Self::Response> = Box::new(|response: Response| {
                 Box::pin(async move {
-                    let mut download_response = DownloadResponse::default();
+                    let mut download_response = ApiStorageDownloadResponse::default();
                     let file_name_regex = Regex::new(r#"attachment; filename="(.*?)""#)?;
                     download_response.file_name = response
                         .headers()
@@ -121,7 +121,7 @@ pub struct DownloadStreamResponse {
     pub stream: Option<BytesStream>,
 }
 
-impl HttpStreamBuilder for DownloadRequest {
+impl HttpStreamBuilder for ApiStorageDownloadRequest {
     type Response = DownloadStreamResponse;
 
     fn stream_builder(self) -> HttpFn<Self::Response> {
@@ -154,7 +154,7 @@ mod tests {
         let user_id = config.user_id.clone();
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
-        let http_fn = DownloadRequest::new()
+        let http_fn = ApiStorageDownloadRequest::new()
             .with_path(format!("/{}/runner.py", user_id))
             .builder();
         let response = client.send(http_fn).await?;
@@ -171,7 +171,7 @@ mod tests {
         let user_id = config.user_id.clone();
         let mut client = OpenApiClient::new(config).with_endpoint_type(EndpointType::Cloud);
 
-        let http_fn = DownloadRequest::new()
+        let http_fn = ApiStorageDownloadRequest::new()
             .with_path(format!("/{}/runner.py", user_id))
             .stream_builder();
         let mut response = client.send(http_fn).await?;

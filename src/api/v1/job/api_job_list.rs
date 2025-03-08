@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct JobListRequest {
+pub struct ApiJobListRequest {
     #[serde(rename = "JobState")]
     pub job_state: Option<String>,
     #[serde(rename = "Zone")]
@@ -19,7 +19,7 @@ pub struct JobListRequest {
     pub page_size: Option<isize>,
 }
 
-impl JobListRequest {
+impl ApiJobListRequest {
     pub fn new() -> Self {
         Self::default()
     }
@@ -46,15 +46,15 @@ impl JobListRequest {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(default)]
-pub struct JobListResponse {
+pub struct ApiJobListResponse {
     #[serde(rename = "Jobs")]
     pub jobs: Vec<JobInfo>,
     #[serde(rename = "Total")]
     pub total: isize,
 }
 
-impl HttpBuilder for JobListRequest {
-    type Response = BaseResponse<JobListResponse>;
+impl HttpBuilder for ApiJobListRequest {
+    type Response = BaseResponse<ApiJobListResponse>;
     fn builder(self) -> HttpFn<Self::Response> {
         Box::new(move || {
             let request_fn: RequestFn = Box::new(move || {
@@ -99,7 +99,7 @@ mod tests {
         let config = OpenApiConfig::new().load_from_env()?;
         let mut client = OpenApiClient::new(config);
 
-        let http_fn = JobListRequest::new().builder();
+        let http_fn = ApiJobListRequest::new().builder();
         let response = client.send(http_fn).await?;
         info!("response: {:#?}", response);
 
