@@ -1,4 +1,5 @@
 use crate::common::define::BaseRequest;
+use anyhow::anyhow;
 use reqwest::{Client, Method, RequestBuilder};
 
 #[derive(Debug, Default)]
@@ -32,31 +33,16 @@ impl HttpBuilder {
             serde_urlencoded::to_string(&self.base_request.queries)?
         );
 
-        match self.base_request.method {
-            Method::GET => Ok(self
-                .http_client
-                .get(&url)
-                .headers(self.base_request.headers.clone())),
-            Method::POST => Ok(self
-                .http_client
-                .post(&url)
-                .headers(self.base_request.headers.clone())
-                .body(self.base_request.body)),
-            Method::PATCH => Ok(self
-                .http_client
-                .patch(&url)
-                .headers(self.base_request.headers.clone())
-                .body(self.base_request.body)),
-            Method::DELETE => Ok(self
-                .http_client
-                .delete(&url)
-                .headers(self.base_request.headers.clone())),
-            Method::PUT => Ok(self
-                .http_client
-                .put(&url)
-                .headers(self.base_request.headers.clone())
-                .body(self.base_request.body)),
-            _ => Err(anyhow::anyhow!("unsupported method")),
-        }
+        let request_builder = match self.base_request.method {
+            Method::GET => self.http_client.get(&url),
+            Method::POST => self.http_client.post(&url),
+            Method::PATCH => self.http_client.patch(&url),
+            Method::PUT => self.http_client.put(&url),
+            Method::DELETE => self.http_client.delete(&url),
+            _ => Err(anyhow!("unsupported method"))?,
+        };
+        Ok(request_builder
+            .headers(self.base_request.headers.clone())
+            .body(self.base_request.body))
     }
 }

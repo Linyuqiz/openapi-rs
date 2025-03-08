@@ -1,3 +1,4 @@
+pub mod file;
 pub mod job;
 pub mod merch;
 pub mod sync;

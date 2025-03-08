@@ -1,4 +1,12 @@
+pub mod api_storage_check_sums_find_chunk;
+pub mod api_storage_chunk_check_sums;
 pub mod api_storage_download;
+pub mod api_storage_list;
+pub mod api_storage_mkdir;
 pub mod api_storage_move;
+pub mod api_storage_read_at;
 pub mod api_storage_remove;
+pub mod api_storage_stat;
+pub mod api_storage_truncate;
 pub mod api_storage_upload;
+pub mod api_storage_write_at;
